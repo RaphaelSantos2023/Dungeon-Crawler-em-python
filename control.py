@@ -1,4 +1,5 @@
 import tkinter as tk
+from tkinter import ttk
 from modalConsumiveis import Pao,Pano,Poscao
 from modal_arma import Weapon, Faca, Espada, Machado, Arco, Sabre, Lanca, Cajado, Envenenamento,Queimadura,sangramento,Sangria,Congelamento,Imprecisão
 from modal_equipamento import Coroa_de_Elenna, Capa_verdade, Armadura_Aroth, Amuleto_Lunar, Capuz_cultista, Armadura_malha, Armadura_couro, Armadura_ferro
@@ -6,6 +7,7 @@ from PIL import Image, ImageTk
 from modal_magica import Sacrificio_Ithral,Sacrificio_Aroth,Sacrificio_Selena,Sacrificio_Elenna
 from functools import partial
 from modal import Player, Aranha, Goblin, Kobold, Zombi, Xonnominag,Vazo_inimigo,besta_Yithuyesh
+from modal_classes import Carreira, Combate, Divindade
 import random
 import copy
 
@@ -889,58 +891,105 @@ def Uso_do_item(item,tipo,i,root):
 
 def Status(root):
 
-    frame =tk.Frame(root,bg="black",relief="ridge", highlightbackground="white",highlightthickness=4)
+    notebook = ttk.Notebook(root)
 
-    frame_img = tk.Frame(frame,bg="black")
-    frame_img.pack()
+    def status_magia(notebook):
 
-    img = redimensionarImagem(jogador.simbolo["status"],302, 391)
+        def mudar_texto(frame, label,magia):
 
-    labelStatus = tk.Label(frame_img, image=img,bg="black")
-    labelStatus.image = img
-    labelStatus.grid(row=1, column=1, padx=6, pady=6)
+            def btn_clicado(magia):
+                print(str(jogador)+"\n\n")
+                jogador.conjurarMagia(magia)
+                print(magia)
+                print("\n\n")
+                print(jogador)
+                Atualizar_Dados()
 
-    ToolTip(labelStatus, jogador.get_estado)
+            label.config(text= magia.descricao)
+            if magia.tipo != "Temporaria":
+                btn = tk.Button(frame, text=magias.nome, bg="black", fg="white", font=("Arial", 12),
+                                    command=partial(btn_clicado,magia),width=15)
+                btn.grid(row=1, column=1, padx=6, pady=6)
 
-    frame_HP = tk.Frame(frame,bg="black",relief="ridge", highlightbackground="white",highlightthickness=4)
-    frame_HP.pack()
+        frame = ttk.Frame(notebook, relief="ridge", style="Custom.TFrame")
 
-    Config.labelHp = tk.Label(frame_HP, text=("HP: "+str(jogador.hp)),bg="black",fg="white",font=("Arial", 15))
-    Config.labelHp.grid(row=0, column=1, padx=6, pady=6)
+        frame_magias =tk.Frame(frame,bg="black",relief="ridge")
+        frame_magias.pack()
 
-    Config.labelMp = tk.Label(frame_HP, text=("MP: "+str(jogador.mp)),bg="black",fg="white",font=("Arial", 15))
-    Config.labelMp.grid(row=0, column=3, padx=6, pady=6)
+        frame_descricao =tk.Frame(frame,bg="black")
+        frame_descricao.pack()
 
-    Config.labelFund = tk.Label(frame_HP, text=("Fund: "+str(jogador.fund)),bg="black",fg="white",font=("Arial", 12))
-    Config.labelFund.grid(row=0, column=2, padx=6, pady=6)
+        label = tk.Label(frame_descricao, text="",bg="black",fg="white",font=("Arial", 15))
+        label.grid(row =0, column =1, padx=6, pady=6)
 
-    frame_dados = tk.Frame(frame,bg="black",relief="ridge", highlightbackground="white",highlightthickness=4)
-    frame_dados.pack()
+        i = 0
+        for magias in jogador.Bencaos:
+            btn = tk.Button(frame_magias, text=magias.nome, bg="black", fg="white", font=("Arial", 12),
+                                    command=partial(mudar_texto,frame_descricao,label,magias),width=15)
+            btn.pack()
+            i+=1
+        return frame
 
-    labelLV = tk.Label(frame_dados, text=("LV:"+str(jogador.level)),bg="black",fg="white",font=("Arial", 12))
-    labelLV.grid(row=0, column=0, padx=6, pady=6)
+    def status_geral(notebook):
 
-    Config.labelExp = tk.Label(frame_dados, text=("exp: "+str(jogador.exp)),bg="black",fg="white",font=("Arial", 12))
-    Config.labelExp.grid(row=0, column=1, padx=6, pady=6)
+        frame = ttk.Frame(notebook, relief="ridge", style="Custom.TFrame")
+        frame_img = tk.Frame(frame,bg="black")
+        frame_img.pack()
 
-    btn = tk.Button(frame_dados, text="Level up", bg="black", fg="white", font=("Arial", 12),
-                            command=partial(Tela_de_atributos),width=15)
-    btn.grid(row=0, column=3, padx=6, pady=6)
+        img = redimensionarImagem(jogador.simbolo["status"],302, 391)
+
+        labelStatus = tk.Label(frame_img, image=img,bg="black")
+        labelStatus.image = img
+        labelStatus.grid(row=1, column=1, padx=6, pady=6)
+
+        ToolTip(labelStatus, jogador.get_estado)
+
+        frame_HP = tk.Frame(frame,bg="black",relief="ridge", highlightbackground="white",highlightthickness=4)
+        frame_HP.pack()
+
+        Config.labelHp = tk.Label(frame_HP, text=("HP: "+str(jogador.hp)),bg="black",fg="white",font=("Arial", 15))
+        Config.labelHp.grid(row=0, column=1, padx=6, pady=6)
+
+        Config.labelMp = tk.Label(frame_HP, text=("MP: "+str(jogador.mp)),bg="black",fg="white",font=("Arial", 15))
+        Config.labelMp.grid(row=0, column=3, padx=6, pady=6)
+
+        Config.labelFund = tk.Label(frame_HP, text=("Fund: "+str(jogador.fund)),bg="black",fg="white",font=("Arial", 12))
+        Config.labelFund.grid(row=0, column=2, padx=6, pady=6)
+
+        frame_dados = tk.Frame(frame,bg="black",relief="ridge", highlightbackground="white",highlightthickness=4)
+        frame_dados.pack()
+
+        labelLV = tk.Label(frame_dados, text=("LV:"+str(jogador.level)),bg="black",fg="white",font=("Arial", 12))
+        labelLV.grid(row=0, column=0, padx=6, pady=6)
+
+        Config.labelExp = tk.Label(frame_dados, text=("exp: "+str(jogador.exp)),bg="black",fg="white",font=("Arial", 12))
+        Config.labelExp.grid(row=0, column=1, padx=6, pady=6)
+
+        btn = tk.Button(frame_dados, text="Level up", bg="black", fg="white", font=("Arial", 12),
+                                command=partial(Tela_de_atributos),width=15)
+        btn.grid(row=0, column=3, padx=6, pady=6)
+        
+        frame_Invent = tk.Frame(frame,bg="black")
+        frame_Invent.pack()
+
+        btn = tk.Button(frame_Invent, text= "Inventario",bg="black",fg="white",font=("Arial", 14),command=partial(iventario_Frame,root))
+        btn.grid(row=0,column=1,padx=6,pady=6)
+
+        ToolTip(labelStatus, jogador.get_estado)
+        dados_atributos(frame_dados)
+
+        return frame
     
-    frame_Invent = tk.Frame(frame,bg="black")
-    frame_Invent.pack()
+    style = ttk.Style()
+    style.configure("Custom.TFrame", background="black")
 
-    btn = tk.Button(frame_Invent, text= "Inventario",bg="black",fg="white",font=("Arial", 14),command=partial(iventario_Frame,root))
-    btn.grid(row=0,column=1,padx=6,pady=6)
+    frame_magia = status_magia(notebook)
+    frame_geral = status_geral(notebook)
 
-    ToolTip(labelStatus, jogador.get_estado)
-    dados_atributos(frame_dados)
+    notebook.add(frame_geral, text="Status")
+    notebook.add(frame_magia, text="Magias")
 
-    return frame
-
-def aumentar_Level():
-    if jogador.AumentarLevel():
-        print("Level up")
+    return notebook
 
 def dados_atributos(frame):
     atributos = {
@@ -1065,43 +1114,6 @@ def Tela_de_atributos():
 
         frame.place(relx=0.5, rely=0.5, anchor="center")
 
-def colocar_atributos(classes_selecionadas,frame):
-        
-    jogador.carreira = classes_selecionadas["Carreira"]["Nome"]
-    jogador.str += classes_selecionadas["Carreira"]["STR"]
-    jogador.dex += classes_selecionadas["Carreira"]["DEX"]
-    jogador.inte += classes_selecionadas["Carreira"]["INT"]
-    jogador.lck += classes_selecionadas["Carreira"]["LCK"]
-    jogador.wis += classes_selecionadas["Carreira"]["WIS"]
-    jogador.cha += classes_selecionadas["Carreira"]["CHA"]
-    jogador.fund += classes_selecionadas["Carreira"]["Fund"]
-    jogador.hpMax += classes_selecionadas["Carreira"]["HP"]
-    jogador.mpMax += classes_selecionadas["Carreira"]["MP"]
-    
-    jogador.combate = classes_selecionadas["Combate"]["Nome"]
-    jogador.str += classes_selecionadas["Combate"]["STR"]
-    jogador.dex += classes_selecionadas["Combate"]["DEX"]
-    jogador.inte += classes_selecionadas["Combate"]["INT"]
-    jogador.lck += classes_selecionadas["Combate"]["LCK"]
-    jogador.wis += classes_selecionadas["Combate"]["WIS"]
-    jogador.cha += classes_selecionadas["Combate"]["CHA"]
-    jogador.fund += classes_selecionadas["Combate"]["Fund"]
-    jogador.hpMax += classes_selecionadas["Combate"]["HP"]
-    jogador.mpMax += classes_selecionadas["Combate"]["MP"]
-    jogador.weapon = classes_selecionadas["Combate"]["Arma"]
-    
-    jogador.divindade = classes_selecionadas["Divindade"]["Nome"]
-    jogador.AddInventario(classes_selecionadas["Divindade"]["Item"])
-    
-    jogador.Bencaos.append(classes_selecionadas["Divindade"]["Bencao"])
-
-    if classes_selecionadas["Carreira"]["Nome"] == "Herbalista":
-        jogador.weapon.efeito.append(Envenenamento)
-
-    jogador.hp = jogador.hpMax
-    jogador.mp = jogador.mpMax
-
-    Destrui_frame(frame)
 
 def Atualizar_Dados():
 
@@ -1177,287 +1189,158 @@ def get_Equipamento():
     item = random.choices(itens,weights=peso,k=1)[0] 
     return item
 
+def colocar_atributos(classes_selecionadas, frame):
+
+    def setAtributos(tipo):
+        jogador.str += classes_selecionadas[tipo].str
+        jogador.dex += classes_selecionadas[tipo].dex
+        jogador.inte += classes_selecionadas[tipo].int
+        jogador.lck += classes_selecionadas[tipo].lck
+        jogador.wis += classes_selecionadas[tipo].wis
+        jogador.cha += classes_selecionadas[tipo].cha
+        jogador.fund += classes_selecionadas[tipo].fund
+        jogador.hpMax += classes_selecionadas[tipo].hp
+        jogador.mpMax += classes_selecionadas[tipo].mp
+    
+    jogador.carreira = classes_selecionadas["Carreira"].nome
+    setAtributos("Carreira")
+
+    jogador.combate = classes_selecionadas["Combate"].nome
+    setAtributos("Combate")
+
+    jogador.weapon = classes_selecionadas["Combate"].arma
+
+    jogador.divindade = classes_selecionadas["Deuses"].nome
+    jogador.AddInventario(classes_selecionadas["Deuses"].item)
+    jogador.Bencaos.append(classes_selecionadas["Deuses"].bencao)
+
+    if jogador.carreira == "Herbalista":
+        jogador.weapon.efeito.append(Envenenamento)
+
+    jogador.hp = jogador.hpMax
+    jogador.mp = jogador.mpMax
+
+    Destrui_frame(frame)
+
 def carreiras_civis():
     carreiras_civis = [
-        {
-            "Nome": "Erudito",
-            "Descricao": "Estudiosos dedicados a compreender o mundo através. ",
-            "STR": 2,
-            "DEX": 2,
-            "INT": 5,
-            "LCK": 2,
-            "WIS": 4,
-            "CHA": 3,
-            "Fund": 1,
-            "HP": 4,
-            "MP":5
-        },
-        {
-            "Nome": "Comerciante",
-            "Descricao": "Negociador habilidoso e carismatico, especialistas em influenciar\nmercados e acumular riqueza. Aumenta o dano conforme a quantidade de dinherio",
-            "STR": 2,
-            "DEX": 3,
-            "INT": 3,
-            "LCK": 4,
-            "WIS": 3,
-            "CHA": 5,
-            "Fund": 3,
-            "HP": 4,
-            "MP":3
-        },
-        {
-            "Nome": "Ferreiro",
-            "Descricao": "Artífices capazes de criar e reparar armas e\nferramentas. Portador de grande força física.",
-            "STR": 5,
-            "DEX": 2,
-            "INT": 2,
-            "LCK": 2,
-            "WIS": 3,
-            "CHA": 3,
-            "Fund": 1,
-            "HP": 5,
-            "MP":4
-        },
-        {
-            "Nome": "Herbalista",
-            "Descricao": "Estudiosos da flora e criação de remédios, venenos e poções.\nMestres da alquimia e natureza. Dá o efeito de envenenamento nas armas",
-            "STR": 2,
-            "DEX": 3,
-            "INT": 4,
-            "LCK": 3,
-            "WIS": 5,
-            "CHA": 3,
-            "Fund": 1,
-            "HP": 3,
-            "MP":4
-        }
+        Carreira("Erudito", "Estudiosos dedicados a compreender o mundo.", 2, 2, 5, 2, 4, 3, 1, 4, 5),
+        Carreira("Comerciante", "Especialista em influenciar mercados.", 2, 3, 3, 4, 3, 5, 3, 4, 3),
+        Carreira("Ferreiro", "Criador e reparador de armas e ferramentas.", 5, 2, 2, 2, 3, 3, 1, 5, 4),
+        Carreira("Herbalista", "Mestre da alquimia e natureza.", 2, 3, 4, 3, 5, 3, 1, 3, 4)
     ]
     return carreiras_civis
 
 def aspecto_combate():
-    aspecto_combate = [
-        {
-            "Nome": "Cavaleiro",
-            "Descricao": "Guerreiro resistente e poderoso em combate corpo a corpo.",
-            "Arma": Espada(),
-            "STR": +3,
-            "DEX": +3,
-            "INT": 0,
-            "LCK": 0,
-            "WIS": 0,
-            "CHA": +1,
-            "Fund": +1,
-            "HP": +5,
-            "MP": +2
-        },
-        {
-            "Nome": "Bárbaro",
-            "Descricao": "Guerreiro feroz, com força bruta e alta resistência.",
-            "Arma": Machado(),
-            "STR": +4,
-            "DEX": +2,
-            "INT": 0,
-            "LCK": +2,
-            "WIS": 0,
-            "CHA": -1,
-            "Fund": +3,
-            "HP": +6,
-            "MP": +1
-        },
-        {
-            "Nome": "Duelista",
-            "Descricao": "Espadachim ágil com ataques rápidos e precisos.",
-            "Arma": Sabre(),
-            "STR": +2,
-            "DEX": +4,
-            "INT": 0,
-            "LCK": +2,
-            "WIS": 0,
-            "CHA": +1,
-            "Fund": +1,
-            "HP": +4,
-            "MP": +3
-        },
-        {
-            "Nome": "Lanceiro",
-            "Descricao": "Controla o campo de batalha com alcance e técnica.",
-            "Arma": Lanca(),
-            "STR": +1,
-            "DEX": +5,
-            "INT": +3,
-            "LCK": 0,
-            "WIS": +2,
-            "CHA": +2,
-            "Fund": +1,
-            "HP": +4,
-            "MP": +2
-        },
-        {
-            "Nome": "Sacerdote",
-            "Descricao": "Ocultista das artes divinas.",
-            "Arma": Cajado(),
-            "STR": -1,
-            "DEX": +2,
-            "INT": +2,
-            "LCK": +1,
-            "WIS": +3,
-            "CHA": -1,
-            "Fund": 0,
-            "HP": +3,
-            "MP": +6
-        }
+    aspectos_combate = [
+        Combate("Cavaleiro", "Guerreiro resistente e poderoso.", Espada(), 3, 3, 0, 0, 0, 1, 1, 5, 2),
+        Combate("Bárbaro", "Guerreiro feroz e resistente.", Machado(), 4, 2, 0, 2, 0, -1, 3, 6, 1),
+        Combate("Lanceiro", "Controla o campo de batalha.", Lanca(), 1, 5, 3, 0, 2, 2, 1, 3, 2),
+        Combate("Sacerdote", "Ocultista das artes divinas.", Cajado(), -1, 2, 2, 1, 3, -1, 0, 3, 6)
     ]
-    return aspecto_combate
+    return aspectos_combate
 
 def divindades_lista():
-    Sacrificio_Ithral,Sacrificio_Aroth,Sacrificio_Selena,Sacrificio_Elenna
+    
     divindades_lista = [
-        {
-            "Nome": "Ithral, Deusa da Sabedoria",
-            "Descricao": "Divindade da sabedoria e do conhecimento arcano.",
-            "Bencao": Sacrificio_Ithral(),
-            "Item": Capa_verdade()
-        },
-        {
-            "Nome": "Aroth, Deus da Guerra",
-            "Descricao": "Deus da força e do combate.",
-            "Bencao": Sacrificio_Aroth(),
-            "Item": Armadura_Aroth()
-        },
-        {
-            "Nome": "Selena, Deusa da Lua",
-            "Descricao": "Deusa do mistério e dos ciclos cósmicos.",
-            "Bencao": Sacrificio_Selena(),
-            "Item": Amuleto_Lunar()
-        },
-        {
-            "Nome": "Elenna, Deusa da Natureza",
-            "Descricao": "Deusa da vida e da cura.",
-            "Bencao": Sacrificio_Elenna(),
-            "Item": Coroa_de_Elenna()
-        }
+        Divindade("Ithral, Deusa da Sabedoria", "Sabedoria e conhecimento arcano.", Sacrificio_Ithral(), Capa_verdade()),
+        Divindade("Aroth, Deus da Guerra", "Força e combate.", Sacrificio_Aroth(), Armadura_Aroth()),
+        Divindade("Selena, Deusa da Lua", "Mistério e ciclos cósmicos.", Sacrificio_Selena(), Amuleto_Lunar()),
+        Divindade("Elenna, Deusa da Natureza", "Vida e cura.", Sacrificio_Elenna(), Coroa_de_Elenna())
     ]
     return divindades_lista
 
 def frame_classes():
-
     radio_secao = [
         {"tipo": "Carreira", "Estado": False, "Array": carreiras_civis()},
         {"tipo": "Combate", "Estado": False, "Array": aspecto_combate()},
         {"tipo": "Deuses", "Estado": False, "Array": divindades_lista()},
     ]
     
-    classes_selecionadas = {
-        "Carreira":None,
-        "Combate":None,
-        "Divindade":None
-    }
-
+    classes_selecionadas = {"Carreira": None, "Combate": None, "Deuses": None}
+    
     def mostrar_info(array, tipo, info, index_secao):
         global btnProximo
+        classes_selecionadas[tipo] = array
+        
         if tipo == "Carreira":
-            classes_selecionadas["Carreira"] = array
-            info.config(
-                text=f"Nome: {array['Nome']}\n"
-                     f"Descrição: {array['Descricao']}\n\n"
-                     f"Atributos:\n"
-                     f"\nHP: {array['HP']} | MP: {array['MP']}\nSTR: {array['STR']} | DEX: {array['DEX']}"
-                     f" | LCK: {array['LCK']}\nWIS: {array['WIS']} | CHA: {array['CHA']} | Fund: {array['Fund']}"
+            info_text = (
+                f"Nome: {array.nome}\n"
+                f"Descrição: {array.descricao}\n\n"
+                f"Atributos:\n"
+                f"HP: {array.hp} | MP: {array.mp}\n"
+                f"STR: {array.str} | DEX: {array.dex} | LCK: {array.lck}\n"
+                f"WIS: {array.wis} | CHA: {array.cha} | Fund: {array.fund}"
             )
         elif tipo == "Combate":
-
-            classes_selecionadas["Combate"] = array
-            texto = (
-                f"Nome: {array['Nome']}\n"
-                f"Descrição: {array['Descricao']}\n\n"
-                f"Arma: {array['Arma'].nome}\n"
-                f"Atributos:"
+            info_text = (
+                f"Nome: {array.nome}\n"
+                f"Descrição: {array.descricao}\n\n"
+                f"Arma: {array.arma.nome}\n"
+                f"Atributos:\n"
             )
-            atributos = [
-                ("HP", array["HP"]),
-                ("MP", array["MP"]),
-                ("STR", array["STR"]),
-                ("DEX", array["DEX"]),
-                ("INT", array["INT"]),
-                ("LCK", array["LCK"]),
-                ("WIS", array["WIS"]),
-                ("CHA", array["CHA"]),
-                ("Fund", array["Fund"]),
-            ]
-
-            if array["HP"] != 0 or array["MP"] != 0:
-                texto += f"\nHP: {array['HP']} | MP: {array['MP']}"
-
-            atributos_restantes = [atributo for atributo in atributos[2:] if atributo[1] != 0]
-
-            for i in range(0, len(atributos_restantes), 3):
-                grupo = atributos_restantes[i:i + 3]
-                texto += "\n" + " | ".join(f"{nome}: {valor}" for nome, valor in grupo)
-
-            info.config(text=texto)
-
+            atributos = {"HP": array.hp, "MP": array.mp, "STR": array.str, "DEX": array.dex,
+                         "INT": array.int, "LCK": array.lck, "WIS": array.wis, "CHA": array.cha, "Fund": array.fund}
+            atributos_formatados = [f"{k}: {v}" for k, v in atributos.items() if v != 0]
+            info_text += "\n".join([" | ".join(atributos_formatados[i:i+3]) for i in range(0, len(atributos_formatados), 3)])
         elif tipo == "Deuses":
-            classes_selecionadas["Divindade"] = array
-            texto = (
-                f"Nome: {array['Nome']}\n"
-                f"Descrição: {array['Descricao']}\n\n"
-                f"Bênção: {array['Bencao']}\n"
-                f"Item: {array['Item'].nome}"
+            info_text = (
+                f"Nome: {array.nome}\n"
+                f"Descrição: {array.descricao}\n\n"
+                f"Bênção: {array.bencao}\n"
+                f"Item: {array.item.nome}"
             )
-            info.config(text=texto)
-
+        
+        info.config(text=info_text)
+        
         for i, secao in enumerate(radio_secao):
             secao["Estado"] = i == index_secao
-
-        if all(classes_selecionadas[categoria] is not None for categoria in classes_selecionadas):
+        print(classes_selecionadas)
+        if all(classes_selecionadas.values()):
             if btnProximo:
                 btnProximo.destroy()
-            
-            btnProximo = tk.Button(Btn_frame, bg="black", text=">", fg="white", font=("Arial", 15),command=partial(colocar_atributos,classes_selecionadas,frame),width=60)
+            btnProximo = tk.Button(Btn_frame, bg="black", text=">", fg="white", font=("Arial", 15),
+                                   command=partial(colocar_atributos, classes_selecionadas, frame), width=60)
             btnProximo.pack()
-
-
+    
     frame = tk.Frame(root, bg="black")
     frame.place(relx=0.5, rely=0.5, anchor="center")
-
+    
     frame_categorias = tk.Frame(frame, bg="black", relief="ridge", highlightbackground="white", highlightthickness=4)
     frame_categorias.pack()
-
+    
     Btn_frame = tk.Frame(frame, bg="black")
     Btn_frame.pack()
-
-    for j in range(3):
-
+    
+    for j, secao in enumerate(radio_secao):
         frame_tipo = tk.Frame(frame_categorias, bg="black")
         frame_tipo.pack()
-
-        labelTipo = tk.Label(frame_tipo, bg="black", fg="white", font=("Arial", 15), text=radio_secao[j]["tipo"])
+        
+        labelTipo = tk.Label(frame_tipo, bg="black", fg="white", font=("Arial", 15), text=secao["tipo"])
         labelTipo.pack()
-    
+        
         frame_info_Classes = tk.Frame(frame_categorias, bg="black")
         frame_info_Classes.pack()
-
+        
         frame_radio = tk.Frame(frame_info_Classes, bg="black", relief="ridge", highlightbackground="white", highlightthickness=4)
         frame_dados = tk.Frame(frame_info_Classes, bg="black", relief="ridge", highlightbackground="white", highlightthickness=4)
-
-
+        
         info = tk.Label(frame_dados, justify="left", bg="black", fg="white", font=("Arial", 12), width=75, height=10)
-        for i in range(4):
-            texto = radio_secao[j]["Array"][i]
-            tipo = radio_secao[j]["tipo"]
+        
+        for i in range(len(secao["Array"])):
             radio_button = tk.Radiobutton(
                 frame_radio,
-                text=texto["Nome"],
-                command=partial(mostrar_info, texto, tipo, info, j),
+                text=secao["Array"][i].nome,
+                command=partial(mostrar_info, secao["Array"][i], secao["tipo"], info, j),
                 bg="black",
                 fg="white",
                 font=("Arial", 15), width=20
             )
             radio_button.grid(row=i, column=0, padx=6, pady=6)
-
+        
         info.pack()
         frame_radio.grid(row=j+1, column=0)
-        frame_dados.grid(row=j+1, column= 1)
+        frame_dados.grid(row=j+1, column=1)
 
 def Destrui_frame(frame):
     frame.destroy()
@@ -1511,8 +1394,6 @@ if __name__ == "__main__":
     mapa.adicionar_entrada_saida()
     mapa.conectar_qs(coordenadas_q)
     mapa.conectar_entrada_saida(coordenadas_q)
-
-    mapa.exibir_matriz()
 
     mapa_copiado = mapa.copiar()
 

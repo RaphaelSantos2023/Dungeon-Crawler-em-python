@@ -189,6 +189,9 @@ class Player:
 
         self.defendendo = False
     
+    def __str__(self):
+        return f"{self.nome}: hp: {self.hpMax} mp: {self.mpMax}"
+    
     def sofrer_Efeito(self,inimigo):
         txt = ""
         for i in range(len(self.estado)):
@@ -237,15 +240,8 @@ class Player:
         return False
     
     def conjurarMagia(self, magia, alvo=None):
-        if self.mp < magia.custo_mana:
-            return f"\n- {self.nome} tentou lançar {magia.nome}, mas não tinha mana suficiente!"
-        
-        self.mp -= magia.custo_mana
-        
-        if magia.tipo == "Temporaria":
-            self.magiaAtiva.append(magia)
-            return f"\n- {self.nome} lançou {magia.nome}! Seu efeito foi ativado."
-        return ""
+        self.magiaAtiva.append(magia)
+        magia.efeito(self)
 
     def attack(self, target):
         text = ""
