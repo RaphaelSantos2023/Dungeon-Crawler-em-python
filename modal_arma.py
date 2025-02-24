@@ -11,7 +11,7 @@ class Effect:
         return self.apply_effect(target)
 
     def __str__(self):
-        return f"{self.nome}: {self.description}"
+        return f"{self.getnome}: {self.description}"
     
     def getnome(self):
         return self.nome

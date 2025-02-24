@@ -6,7 +6,7 @@ from modal_equipamento import Coroa_de_Elenna, Capa_verdade, Armadura_Aroth, Amu
 from PIL import Image, ImageTk
 from modal_magica import Sacrificio_Ithral,Sacrificio_Aroth,Sacrificio_Selena,Sacrificio_Elenna
 from functools import partial
-from modal import Player, Aranha, Goblin, Kobold, Zombi, Xonnominag,Vazo_inimigo,besta_Yithuyesh
+from modal import Player, Aranha, Goblin, Kobold, Zombi, Xonnominag,Vazo_inimigo,besta_Yithuyesh, mimico
 from modal_classes import Carreira, Combate, Divindade
 import random
 import copy
@@ -18,16 +18,9 @@ class Config:
     frame_ItemDados = None
     frame_Inimigo = None
     frame_desc= None
+    frame_morte = None
 
-    labelSTR = "Força"
-    labelDEX = "Destreza"
-    labelINT = "Inteligência"
-    labelWIS = "Sabedoria"
-    labelCHA = "Carisma"
-    labelLCK = "Sorte"
-
-    # Criando o array
-    labelAtributo = [labelSTR, labelDEX, labelINT, labelWIS, labelCHA, labelLCK]
+    labelAtributo = []
 
     labelHp = None
     labelMp = None
@@ -487,8 +480,8 @@ class Mapa:
                     else:
                         txt = "(Teste de Sabedoria:Falha)\nAs moedas se desmancham e escorrem dos dedos\nNuma massa negra e putrida.\nUm mau presentimento se sufoca a garganta\nAlgo de ruim te acompanha das sombras"
                         self.EmCombate = True
-                        nivel = random.randint(Config.andar, Config.andar)
-                        self.btn1.config(text=btn1T,command=partial(Criar_Tela_Combat,Vazo_inimigo(nivel),frame))
+                        inimigoC = random.choice([Vazo_inimigo(),mimico()])
+                        self.btn1.config(text=btn1T,command=partial(Criar_Tela_Combat,inimigoC,frame))
                 else:
                     txt = "Você saí do quarto"
             elif tipo == 4:
@@ -517,8 +510,6 @@ class Mapa:
                     self.btn2.config(text=btn2T)
             
             label.config(text=txt)
-            if self.EmCombate is False:
-                Atualizar_Dados()
     
     def alterar_estado_entrada(self, linha, coluna, novo_estado):
         for coord in self.coordenadas:
@@ -587,7 +578,6 @@ def atualizar_Mapa():
     frame_imagens = mapa_copiado.exibir_area_com_imagens(viewX, viewY, imagens)
     
     if mapa_copiado.EmEvento is not True:
-    # Reposicionar o jogador no novo frame
         frame_imagens = mapa_copiado.colocar_Jogador(
             frame_imagens,
             jogador,
@@ -667,10 +657,28 @@ def Criar_Tela_Combat(inimigo, root):
                         command=partial(Descisao, jogador, inimigo, "Convencer", LabelDescri, Turno),width=15)
     btnConv.grid(row=2, column=1, padx=3, pady=3)
 
-    btnAmea= tk.Button(frame_btn, text="Ameaçar", bg="black", fg="white", font=("Arial", 12), 
+    btnAmea= tk.Button(frame_btn, text="Intimidar", bg="black", fg="white", font=("Arial", 12), 
                        command=partial(Descisao, jogador, inimigo, "Ameaça", LabelDescri, Turno),width=15)
     btnAmea.grid(row=2, column=2, padx=3, pady=3)
 
+    LabelMag = tk.Label(frame_btn, text="Magias: ", bg="black", fg="white", font=("Arial", 12))
+    LabelMag.grid(row=3, column=0, padx=3, pady=3)
+    
+    for i in range(len(jogador.Bencaos)):
+        if (jogador.Bencaos[i].tipo =="Temporaria" ):
+            btnConv = tk.Button(frame_btn, text=jogador.Bencaos[i].nome, bg="black", fg="white", font=("Arial", 12), 
+                            command=partial(Conjurar_magia_Temporaria, jogador,jogador.Bencaos[i], LabelDescri),width=15)
+            btnConv.grid(row=3+i, column=1, padx=3, pady=3)
+
+def Conjurar_magia_Temporaria(personagem, magia,LabelDescri):
+    LabelDescri.config(state="normal")
+
+    txt= "\n"
+    txt += personagem.conjurarMagia(magia)
+    
+    LabelDescri.insert("end", txt + "\n")
+    Atualizar_Dados()
+    
 def Descisao(personagem, adversario, tipo, LabelDescri, Turno):
     LabelDescri.config(state="normal")
 
@@ -698,9 +706,11 @@ def Acao(personagem, adiversario, tipo):
     if tipo == "Ataque":
         txt = personagem.attack(adiversario)
     elif tipo == "Fugir":
+        
         acerto = personagem.Fugir(adiversario)
         if acerto:
             txt = f"\n- {personagem.nome} fugiu com sucesso."
+            Config.saida_batalha = True
             return
         else:
             txt = f"\n- {personagem.nome} falhou ao fugir."
@@ -729,7 +739,7 @@ def Acao(personagem, adiversario, tipo):
 
 def definir_vitoria(personagem, adversario):
 
-    if personagem.hp <=0 :
+    if personagem.hp <=0 or personagem.mp <= 0:
         Config.saida_batalha = None
         return False
     
@@ -742,60 +752,66 @@ def Dados_Inimigo(inimigo):
         Config.frame_Inimigo.destroy()
         Config.frame_Inimigo = None
 
-    Config.frame_Inimigo = tk.Frame(Config.frame_desc,bg="black", relief="ridge", highlightbackground="white", highlightthickness=4)
+    Config.frame_Inimigo = tk.Frame(Config.frame_desc,bg="red", relief="ridge", highlightbackground="white", highlightthickness=4)
     Config.frame_Inimigo.place(relx=0.8, rely=0.15, anchor="center")
 
     Config.labelHPInimigo = tk.Label(Config.frame_Inimigo, text="HP:"+str(inimigo.hp),bg="black",fg="white",font=("Arial", 12))
     Config.labelHPInimigo.grid(row=0, column=2, padx=6, pady=6)
 
-    labelLv = tk.Label(Config.frame_Inimigo,text="Lv:"+str(inimigo.nivel),bg="black",fg="white",font=("Arial", 12))
-    labelLv.grid(row=0, column=1, padx=6, pady=6)
-
     labelNome = tk.Label(Config.frame_Inimigo,text=inimigo.nome,bg="black",fg="white",font=("Arial", 12))
     labelNome.grid(row=0, column=0, padx=6, pady=6)
 
 def Tela_vitoria(caso, personagem, adversario):
+    
     Config.frame_desc.destroy()
+    Config.frame_Inimigo.destroy()
 
-    frame = tk.Frame(root,bg="black", relief="ridge", highlightbackground="white", highlightthickness=4, width=100, height= 100)
+    frame = tk.Frame(root,bg="yellow", relief="ridge", highlightbackground="white", highlightthickness=4, width=100, height= 100)
     frame.place(relx=0.5, rely=0.5, anchor="center")
 
     btn1T = ">"
+
+    mapa_copiado.EmEvento == True
     if Config.saida_batalha is None:
         if caso:
             fund = random.randint(1, adversario.fund)+1
             item = get_Consumivel()
-            txt = f"Você venceu!\nVocê conseguiu {adversario.exp} exp\n{fund} funds\nConseguiu {item.nome}"
+            txt = f"Você venceu!\nVocê conseguiu {adversario.exp} exp\n{fund} funds\n {item.nome}"
+            
+            if jogador.magiaAtiva:
+                for metodo in jogador.magiaAtiva:
+                    metodo.concequencia_efeito(jogador)
+                    txt += f'\nHaverá consequencias para seus atos'
+
             personagem.exp += adversario.exp
             personagem.fund += fund
             personagem.AddInventario(item)
-            Config.frame_Inimigo.destroy()
             
-            Atualizar_Dados()
         else:
-            txt = "Você morreu"
-            Config.frame_Inimigo.destroy()
+            Config.frame_jogador.destroy()
+            frame.destroy()
+            return
     else:
         txt = "Você saiu da batalha"
         Config.saida_batalha = None
-    
+       
     label = tk.Label(frame, text=txt, bg="black", fg="white", highlightthickness=4, highlightbackground="black", font=("Arial", 12),width=100)
     label.grid(row=1, column=1, padx=6, pady=6)
 
     btn1 = tk.Button(frame, text=btn1T, bg="black", fg="white", borderwidth=3, relief="sunken", padx=25, pady=12,
-                     command=partial(Reinicio, caso,frame,Config.frame_jogador))
+                     command=partial(Reinicio, caso,frame))
     btn1.grid(row=3, column=1, padx=5, pady=5)
     
-def Reinicio(caso,frame,frame_destroy):
+def Reinicio(caso,frame):
     global mapa_copiado
-
-    frame.destroy()
-
+    
+    if frame is not None:
+        frame.destroy()
+        frame = None
+    
     if caso == False:
-        frame_destroy.destroy()
         Config.frame_jogador = None
         reiniciar_jogo()
-    
     else:
         mapa_copiado.EmEvento = False
         atualizar_Mapa()
@@ -855,11 +871,8 @@ def iventario_Frame(root):
 
 def Dados_item(item, frame, i, root):
     if Config.frame_ItemDados is None:
-        # Criar frame para exibir os dados do item
         Config.frame_ItemDados = tk.Frame(frame, bg="black")
-        Config.frame_ItemDados.grid(row=0,column=1)  # Usar pack para alinhar à direita
-
-        # Nome do item
+        Config.frame_ItemDados.grid(row=0,column=1)
         LabelNome = tk.Label(Config.frame_ItemDados, text=item.nome, bg="black", fg="white", font=("Arial", 12))
         LabelNome.pack(padx=6, pady=6)
 
@@ -878,11 +891,17 @@ def Dados_item(item, frame, i, root):
 
 def Uso_do_item(item,tipo,i,root):
 
+    print("Uso de item")
+    print('\n')
+    print(tipo)
     Config.frame_ItemDados.destroy()
     Config.frame_ItemDados = None
 
     jogador.Usar(item,tipo,i)
 
+    if tipo == "Armadura":
+        atualizarAtributo()
+    
     Config.frame_iventario.destroy()
     Config.frame_iventario = None
 
@@ -898,11 +917,7 @@ def Status(root):
         def mudar_texto(frame, label,magia):
 
             def btn_clicado(magia):
-                print(str(jogador)+"\n\n")
                 jogador.conjurarMagia(magia)
-                print(magia)
-                print("\n\n")
-                print(jogador)
                 Atualizar_Dados()
 
             label.config(text= magia.descricao)
@@ -1002,11 +1017,8 @@ def dados_atributos(frame):
     }
 
     for i, (nome, valor) in enumerate(atributos.items()):
-        # Calcula a linha e coluna para posicionamento
-        row = (i // 3) + 1  # Adiciona +1 para começar da linha 1
-        col = i % 3         # Determina a coluna (0, 1, 2)
-
-        # Cria o label
+        row = (i // 3) + 1 
+        col = i % 3 
         label = tk.Label(
             frame,
             text=(nome + ":" + str(valor)),
@@ -1014,11 +1026,21 @@ def dados_atributos(frame):
             fg="white",
             font=("Arial", 12),
         )
-        # Posiciona o label na grade
         label.grid(row=row, column=col, padx=6, pady=6)
-        # Armazena o label na lista
         Config.labelAtributo.append(label)
 
+def atualizarAtributo():
+    atributos = {
+        "STR": jogador.str,
+        "DEX": jogador.dex,
+        "INT": jogador.inte,
+        "LCK": jogador.lck,
+        "WIS": jogador.wis,
+        "CHA": jogador.cha,
+    }
+
+    for i, (nome, valor) in enumerate(atributos.items()):
+        Config.labelAtributo[i].config(text=(nome + ":" + str(valor)))
 
 def Subitrair_Aumentar_Atributo(atributos, nome, pontos, label, labelPontos, varSelecionada):
     atributo = varSelecionada.get()  # Obtém o nome do atributo selecionado
@@ -1114,23 +1136,11 @@ def Tela_de_atributos():
 
         frame.place(relx=0.5, rely=0.5, anchor="center")
 
-
 def Atualizar_Dados():
 
-    if jogador.hp <= 0:
-        frame = tk.Frame(bg="black", relief="ridge", highlightbackground="white", highlightthickness=4,width=10)
-        btn1T = ">"
-        txt = "Você morreu"
-        Config.frame_jogador.destroy()
-
-        label = tk.Label(frame, text=txt, bg="black", fg="white", highlightthickness=4, highlightbackground="black", font=("Arial", 12),width=100)
-        label.grid(row=1, column=1, padx=6, pady=6)
-
-        btn1 = tk.Button(frame, text=btn1T, bg="black", fg="white", borderwidth=3, relief="sunken", padx=25, pady=12,
-                     command=partial(Reinicio, False,frame,Config.frame_Inimigo))
-        btn1.grid(row=3, column=1, padx=5, pady=5)
-
-        frame.place(relx=0.4, rely=0.5, anchor="center")
+    if jogador.hp <= 0 or jogador.mp <= 0:
+        mapa_copiado.EmEvento = True
+        tela_morte()
     else:
         Config.labelHp.config(text="HP: "+str(jogador.hp))
         Config.labelMp.config(text="MP: "+str(jogador.mp))
@@ -1143,17 +1153,29 @@ def get_Armamento():
     item = random.choices(itens,weights=peso,k=1)[0]
     return item
 
-def get_Inimigo():
-    nivel = random.randint(Config.andar, Config.andar)
+def tela_morte():
 
-    # Lista de inimigos com andares mínimos e pesos
+    if Config.frame_jogador != None:
+        Config.frame_jogador.destroy()
+    
+    Config.frame_morte = tk.Frame()
+    Config.frame_morte.pack()
+
+    label = tk.Label(Config.frame_morte,text="Você morreu")
+    label.pack()
+
+    btn = tk.Button(Config.frame_morte, text=">", command=partial(Reinicio,False,Config.frame_morte))
+    btn.pack()
+    
+
+def get_Inimigo():
     inimigos_disponiveis = [
-        (Goblin(nivel), 1, 3, 3),   # Aparece do andar 1 ao 3 (peso 3)
-        (Kobold(nivel), 2, 5, 2),   # Aparece do andar 2 ao 5 (peso 2)
-        (Aranha(nivel), 1, 7, 3),   # Aparece do andar 3 ao 7 (peso 2)
-        (Zombi(nivel), 2, 10, 2),   # Aparece do andar 4 ao 10 (peso 2)
-        (Xonnominag(nivel), 4, 12, 2),  # Aparece a partir do andar 6 (peso 1)
-        (besta_Yithuyesh(nivel),6,14,2)
+        (Goblin(), 1, 3, 3),   # Aparece do andar 1 ao 3 (peso 3)
+        (Kobold(), 2, 5, 2),   # Aparece do andar 2 ao 5 (peso 2)
+        (Aranha(), 1, 7, 3),   # Aparece do andar 3 ao 7 (peso 2)
+        (Zombi(), 2, 10, 2),   # Aparece do andar 4 ao 10 (peso 2)
+        (Xonnominag(), 4, 12, 2),  # Aparece a partir do andar 6 (peso 1)
+        (besta_Yithuyesh(),6,14,2)
     ]
 
     # Filtra os inimigos que podem aparecer no andar atual
@@ -1219,6 +1241,13 @@ def colocar_atributos(classes_selecionadas, frame):
 
     jogador.hp = jogador.hpMax
     jogador.mp = jogador.mpMax
+
+    if Config.labelAtributo != []:
+        print("destroy")
+        Config.labelAtributo = []
+    
+    Config.frame_jogador = Status(root)
+    Config.frame_jogador.place(relx=0.8, rely=0.5, anchor="center")
 
     Destrui_frame(frame)
 
@@ -1344,9 +1373,6 @@ def frame_classes():
 
 def Destrui_frame(frame):
     frame.destroy()
-
-    Config.frame_jogador = Status(root)
-    Config.frame_jogador.place(relx=0.8, rely=0.5, anchor="center")
 
     frame_imagens.place(relx=0.35, rely=0.45, anchor="center")
     

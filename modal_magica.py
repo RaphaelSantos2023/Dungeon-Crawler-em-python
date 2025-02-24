@@ -1,11 +1,12 @@
 import random
 
 class Magia:
-    def __init__(self, nome, custo_mana, dano, tipo,descricao,ativa=False, efeito=None):
+    def __init__(self, nome, custo_mana, dano, tipo,descricao,ativa=False, efeito=None, concequencia_efeito = None):
         self.nome = nome
         self.custo_mana = custo_mana
         self.dano = dano
         self.efeito = efeito
+        self.concequencia_efeito = concequencia_efeito
         self.descricao = descricao
         self.tipo = tipo
         self.ativa = ativa
@@ -65,8 +66,12 @@ def Sacrificio_Hp(jogador):
 
     return "Sacrificio a Elenna"
 
-def Sacrificio_dano(dano):
-    dano += dano //2
+def Sacrificio_dano(jogador):
+    jogador.Dano += jogador.Dano //2
+    return "- O dano foi aumentado"
+
+def Penalidade_Sacrificio_dano(jogador):
+    jogador.penalidade = jogador.Dano//2
 
 
 class Sacrificio_Ithral(Magia):
@@ -75,7 +80,7 @@ class Sacrificio_Ithral(Magia):
 
 class Sacrificio_Aroth(Magia):
     def __init__(self):
-        super().__init__("Sacrificio a Aroth", 3, 0, "Temporaria", "Por três turnos, seu dano dobra,\nPorém, após isso, ele diminui pela metado", efeito=Sacrificio_dano)
+        super().__init__("Sacrificio a Aroth", 3, 0, "Temporaria", "Por três turnos,\nseu dano dobra,\nPorém, após isso,\nele diminui pela metado", efeito=Sacrificio_dano,concequencia_efeito = Penalidade_Sacrificio_dano)
 
 class Sacrificio_Selena(Magia):
     def __init__(self):

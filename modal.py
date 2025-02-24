@@ -4,17 +4,16 @@ from modal_arma import Envenenamento, Sangria
 from modal_magica import Sacrificio_Aroth
 
 class Inimigo:
-    def __init__(self, nome, nivel, hp_base, dano, exp, str_base, dex, cha, fund, crit_chance,efeito, simbolo):
-        self.hp = hp_base * nivel
+    def __init__(self, nome, hp_base, dano, exp, str_base, dex, cha, fund, crit_chance,efeito, simbolo):
+        self.hp = hp_base
         self.nome = nome
         self.simbolo = {"simbolo": simbolo}
         self.dano = dano
-        self.exp = exp * nivel
+        self.exp = exp
         self.str = str_base
         self.dex = dex
         self.cha = cha
         self.fund = fund
-        self.nivel = nivel
         self.crit_chance = crit_chance  # Chance de crítico
         self.estado = []
         self.precisao = 0
@@ -85,33 +84,37 @@ class Inimigo:
     def perderVida(self, dano):
         self.hp -= dano
 
+class mimico(Inimigo):
+    def __init__(self):
+        super().__init__("Mimíco", 13, 5, 13, 9, 8, 9, 8, 0.25, None,"img/Personagens/MIMICO.png")  
+
 class besta_Yithuyesh(Inimigo):
-    def __init__(self, nivel):
-        super().__init__("Besta de Yithuyesh", nivel, 17, 7, 15, 9, 8, 9, 0, 0.25, [Sangria],"img/Personagens/besta_Yithuyesh.png")
+    def __init__(self):
+        super().__init__("Besta de Yithuyesh",  17, 7, 15, 9, 8, 9, 0, 0.25, [Sangria],"img/Personagens/besta_Yithuyesh.png")
 
 class Aranha(Inimigo):
-    def __init__(self, nivel):
-        super().__init__("Aranha", nivel, 12, 2, 10, 4, 4, 6, 1, 0.15, [Envenenamento] ,"img/Personagens/aranha1.png")
+    def __init__(self):
+        super().__init__("Aranha", 12, 2, 10, 4, 4, 6, 1, 0.15, [Envenenamento] ,"img/Personagens/aranha1.png")
 
 class Goblin(Inimigo):
-    def __init__(self, nivel):
-        super().__init__("Goblin", nivel, 13, 4, 10, 4, 4, 6, 3, 0.10, None, "img/Personagens/goblin2.png")
+    def __init__(self):
+        super().__init__("Goblin", 13, 4, 10, 4, 4, 6, 3, 0.10, None, "img/Personagens/goblin2.png")
 
 class Xonnominag(Inimigo):
-    def __init__(self, nivel):
-        super().__init__("Xonnominag", nivel, 14, 8, 15, 8, 5, 7, 0, 0.2, None, "img/Personagens/Xonnominag.png")
+    def __init__(self):
+        super().__init__("Xonnominag", 14, 8, 15, 8, 5, 7, 1, 0.2, None, "img/Personagens/Xonnominag.png")
 
 class Zombi(Inimigo):
-    def __init__(self, nivel):
-        super().__init__("Zombi", nivel, 15, 3, 15, 5, 4, 6, 2, 0.05, None,"img/Personagens/zombi.png")
+    def __init__(self):
+        super().__init__("Zombi", 15, 3, 15, 5, 4, 6, 2, 0.05, None,"img/Personagens/zombi.png")
 
 class Kobold(Inimigo):
-    def __init__(self, nivel):
-        super().__init__("Kobold", nivel, 16, 5, 15, 5, 4, 6, 3, 0.12, None,"img/Personagens/Kobold1.png")
+    def __init__(self):
+        super().__init__("Kobold", 16, 5, 15, 5, 4, 6, 3, 0.12, None,"img/Personagens/Kobold1.png")
 
 class Vazo_inimigo(Inimigo):
-    def __init__(self, nivel):
-        super().__init__("Vazo de almas", nivel, 8, 2, 8, 3, 5, 6, 3, 0.12, None,"img/Personagens/vazo_almas.png")
+    def __init__(self):
+        super().__init__("Vazo de almas", 8, 2, 8, 3, 5, 6, 3, 0.12, None,"img/Personagens/vazo_almas.png")
     
     def attack(self, target):
         text = ""
@@ -177,6 +180,7 @@ class Player:
         self.Bencaos = []
 
         self.weapon = None
+        self.armadura = None
         self.inventario = [Pao(),Pano()]
         
         self.estado = []
@@ -241,7 +245,12 @@ class Player:
     
     def conjurarMagia(self, magia, alvo=None):
         self.magiaAtiva.append(magia)
-        magia.efeito(self)
+        if magia.tipo != "Temporaria":
+            magia.efeito(self)
+        else:
+            txt = magia.efeito(self)
+            return txt
+
 
     def attack(self, target):
         text = ""
@@ -295,16 +304,42 @@ class Player:
         self.Dano = self.weapon.Dano
     
     def Usar(self, item,tipo,id):
-        print("Usou1")
         if tipo == "Armadura":
-            print("tipo: "+tipo.nome)
+            def setarArmadura():
+                self.armadura = item
+                self.hp += item.Vitalidade
+                self.mp += item.Sanidade
+
+                self.str += item.str
+                self.dex += item.dex
+                self.inte += item.inte
+                self.lck += item.lck
+                self.wis += item.wis
+                self.cha += item.cha
+            
+            def DesetarArmadura():
+                self.hp -= self.armadura.Vitalidade
+                self.mp -= self.armadura.Sanidade
+
+                self.str -= self.armadura.str
+                self.dex -= self.armadura.dex
+                self.inte -= self.armadura.inte
+                self.lck -= self.armadura.lck
+                self.wis -= self.armadura.wis
+                self.cha -= self.armadura.cha
+            
+            if self.armadura == None:
+                setarArmadura()
+            elif self.armadura != item:
+                DesetarArmadura()
+                setarArmadura()
         else:
-            if self.hp + item.vida <= self.hpMax:
-                self.hp += item.vida
-            else:
-                self.hp = self.hpMax
+            if self.hp != self.hpMax:
+                if self.hp + item.vida <= self.hpMax:
+                    self.hp += item.vida
+                else:
+                    self.hp = self.hpMax
                 self.RemoveInventario(id)
-        print("Usou2")
     
     def RemoveInventario(self,id):
         self.inventario.pop(id)
