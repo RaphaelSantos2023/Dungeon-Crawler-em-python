@@ -1,15 +1,19 @@
 import tkinter as tk
 from tkinter import ttk
-from modalConsumiveis import Pao,Pano,Poscao
-from modal_arma import Weapon, Faca, Espada, Machado, Arco, Sabre, Lanca, Cajado, Envenenamento,Queimadura,sangramento,Sangria,Congelamento,Imprecisão
-from modal_equipamento import Coroa_de_Elenna, Capa_verdade, Armadura_Aroth, Amuleto_Lunar, Capuz_cultista, Armadura_malha, Armadura_couro, Armadura_ferro
 from PIL import Image, ImageTk
-from modal_magica import Sacrificio_Ithral,Sacrificio_Aroth,Sacrificio_Selena,Sacrificio_Elenna
 from functools import partial
-from modal import Player, Aranha, Goblin, Kobold, Zombi, Xonnominag,Vazo_inimigo,besta_Yithuyesh, mimico
-from modal_classes import Carreira, Combate, Divindade
 import random
 import copy
+
+from modalConsumiveis import Pao,Pano,Poscao
+from modal_arma import Weapon, Faca, Espada, Machado, Arco, Sabre, Lanca, Cajado, Envenenamento,Queimadura,sangramento,Sangria,Congelamento,Atordoamento
+from modal_equipamento import Coroa_de_Elenna, Capa_verdade, Armadura_Aroth, Amuleto_Lunar, Capuz_cultista, Armadura_malha, Armadura_couro, Armadura_ferro
+from modal_magica import Sacrificio_Ithral,Sacrificio_Aroth,Sacrificio_Selena,Sacrificio_Elenna
+from modal import Player, Aranha, Goblin, Kobold, Zombi, Xonnominag,Vazo_inimigo,besta_Yithuyesh, mimico
+from modal_classes import Carreira, Combate, Divindade
+
+from control_events_cenario import Bau,Encontro_Fantasma,combate_cenario,Tesouro_suspeito,fenda
+from control_events_conclusao import bau_respsota,Evneto_combate_respsota,tesouro_respsota,fenda_repsosta,fantasma_resposta
 
 class Config:
     frame_jogador = None
@@ -263,9 +267,6 @@ class Mapa:
 
                 self.sortear_eventos_especiais()
 
-                if self.contador_eventos in self.eventos_especiais:
-                    print(f"Evento especial ativado no evento {self.contador_eventos}!")
-
                 self.Combate = True
                 self.EmEvento = True
                 self.localAtual = {"x": x, "y": y}
@@ -292,12 +293,9 @@ class Mapa:
     
     def verificar_coordenada(self, linha, coluna):
 
-        for item in self.coordenadas:
-            print(f"---> Linha: {item['linha']}, Coluna: {item['colune']}, Entrada: {item['Entrada']}")
-
         for coord in self.coordenadas:
             if coord["linha"] == linha and coord["colune"] == coluna and coord.get("Entrada", False):
-                print("B: "+ str(coord.get("Entrada")))
+                coord["Entrada"] = False
                 return True
         return False
     
@@ -359,31 +357,13 @@ class Mapa:
         return frame
     
     def selecionar_evento(self):
-        #["Bau","Comerciante","Emboscada","Tesouro Amaldiçoado","Vala"]
         peso = [1,1,3,2,2]
 
-        evento = random.choices(range(len(self.lista_Eventos)),weights=peso,k=1)[0]
-        
-        if evento == 0:
-            label = "No meio das ruinas do comodo,\nvocê encontra um baú\nDeseja abrir?"
-            btn1 = "Abrir o Baú"
-            btn2 = "<Pode ser um Mimico>"
-        elif evento == 1:
-            label = "De subito, você para.\nO cheiro de enchofre invade seu olfato.\nVocê algussa o ouvido no que parece ser uma voz sussurando, como uma brisa gelida.\n"
-            btn1 = "Para para ouvir"
-            btn2 = "Resistir"
-        elif evento == 2:
-            label = "Formas mostruosas grunhem para você, nas trevas!"
-            btn1 = "<VENHAM COM TUDO!>"
-            btn2 = "Tentar fugir"
-        elif evento == 3:
-            label = "Joias e moedas se empilham numa mesa\nCadaveres e esqueletos se extendem no chão\nAlguns ainda frescos"
-            btn1 = "Pegar tesouro"
-            btn2 = "<Muito ariscado>"
-        elif evento == 4:
-            label = "Uma fenda fere a pedra sobre seus pés\nCintilando um brilho palido, uma luz\npisca para você, seduzente"
-            btn1 = "Tentar pegar o objeto"
-            btn2 = "Ignorar"
+        eventos = [Bau,Encontro_Fantasma, combate_cenario,Tesouro_suspeito,fenda]
+
+        eventos_escolhido = random.choices(eventos, weights=peso, k=1)[0]
+
+        label,btn1,btn2,evento = eventos_escolhido()
 
         return label,btn1,btn2,evento
     
@@ -407,119 +387,40 @@ class Mapa:
                 self.descer_Saida = False
         else:
 
-            if 0 <= self.localAtual["x"] < len(self.matriz) and 0 <= self.localAtual["y"] < len(self.matriz[0]):
-                self.alterar_estado_entrada(self.localAtual["x"], self.localAtual["y"], False)
-
             teste = random.randrange(1,13)
+            txt = ""
 
             btn1T = ">"
             self.btn1.config(text=btn1T,command=partial(self.destruir_Tela_evento,frame))
             self.btn2.grid_forget() 
 
             if tipo == 0:
-                
-                if btn == 1:
-                    if jogador.lck >= teste:
-                        tesouro = random.choice(["Consumivel","Dinheiro"])
+                bau_respsota(btn,self.btn1,self.btn2,label,txt,teste,jogador,btn1T,get_money,get_Consumivel,frame,self.destruir_Tela_evento)
 
-                        if tesouro == "Consumivel":
-                            item = get_Consumivel()
-                            jogador.AddInventario(item)
-                            item = item.nome
-                        else:
-                            item = get_money()
-                            jogador.receberMoeda(item)
-                            item = str(item)
-                        txt = "(Teste de sorte:Sucesso)\nVocê conseguiu "+ item
-                    else:
-                        txt = "(Teste de sorte:Falha)\nNo que você abre, dentes amolados\nagarram seu braço e puxam pra dentro\n(-2 de vida)\nVocê se contorce e grita, mas consegue tirar seu braço\nO mimico avança na sua direção"
-                        jogador.perderVida(2)
-                else:
-                    txt = "Você saí do quarto"
-                    btn1T = ">"
-                    btn2T = ""
-                    label.config(text=txt)
-                    self.btn1.config(text=btn1T,command=partial(self.destruir_Tela_evento,frame))
-                    self.btn2.config(text=btn2T)
             elif tipo == 1:
-                
-                if btn == 1 and jogador.wis >= teste:
-                    txt = "(Tesde de Sabedoria: Sucesso)\nNão é uma voz, mas varias, em coral.\nA melidiadesencarnada lhe traz paz,\nMesmo num lugar tão sombrio\nQuanto a masmorra\n(+2 mp)"
-                elif btn == 2 and jogador.dex >= teste:
-                    txt = "(Teste de Dextreza: Sucesso)\nVocê consegue fugir da sala\nsem maiores problemas. Qualquer que fosse a fonte da vozes\nprovavelmente não é coisa boa.\nNada nessa masmorra é boa"
-                else:
-                    txt = ""
-                    if btn== 2:
-                        txt="(Teste de Dextreza: Falha)\nNão importa o quanto você corra, a voz se agrava em uma crescente."
-                    else:
-                        txt="(Teste de Sabedoria: Falha)"
-                    txt+="\nVocê percebe que não são vozes, mas gritos.\nUm pandemonio de almas condenadas berrão em dor.\nO horror e exaustão te levam aos joelhos.\nVocê desmaia.\nAo acordar, as vozes sairam, mas o eco\nde seu sofrimento vai permanecer pra sempre com você\n(- 3 mp)"
-
+                self.EmCombate = fantasma_resposta(btn,jogador,teste,txt,label)
             elif tipo == 2:
-                if btn == 1:
-                    txt = "Você saca sua arma e avança"
-                    self.EmCombate = True
-                    self.btn1.config(text=btn1T,command=partial(Criar_Tela_Combat,get_Inimigo(),frame))
-                else:
-                    if jogador.dex >= teste:
-                        txt = "(Teste de Destreza:Sucesso)\nPassos violentos se perseguem por corredores,\nmas você é mais rapido e consegue fugir"
-                    else:
-                        txt = "(Teste de Destreza:Falha)\nNo que você ia se virar para fuir\nA criatura corta parte do seu braço\n(-3 vida)\ne intercepta o caminho"
-                        jogador.perderVida(3)
-                        self.EmCombate = True
-                        self.btn1.config(text=btn1T,command=partial(Criar_Tela_Combat,get_Inimigo(),frame))
-            elif tipo == 3:
-                if btn == 1:
-                    if jogador.wis >= teste:
-                        dinheiro = get_money()
-                        arma = get_Armamento()
-
-                        jogador.AddInventario(arma)
-                        jogador.receberMoeda(dinheiro)
-                        txt = "(Teste de sabedoria:Sucesso)\nVocê pegou "+ str(dinheiro)+" moedas e "+ arma.nome
-                    else:
-                        txt = "(Teste de Sabedoria:Falha)\nAs moedas se desmancham e escorrem dos dedos\nNuma massa negra e putrida.\nUm mau presentimento se sufoca a garganta\nAlgo de ruim te acompanha das sombras"
-                        self.EmCombate = True
-                        inimigoC = random.choice([Vazo_inimigo(),mimico()])
-                        self.btn1.config(text=btn1T,command=partial(Criar_Tela_Combat,inimigoC,frame))
-                else:
-                    txt = "Você saí do quarto"
-            elif tipo == 4:
-                if btn == 1:
-                    if jogador.lck >= teste:
-                        peso = [1,4]
-                        tesouro = random.choices(["Arma","Dinheiro"], weights=peso,k=1)
-
-                        if tesouro == "Arma":
-                            item = get_Armamento()
-                            jogador.AddInventario(item)
-                            txt = "(Teste de sorte:Sucesso)\nVocê pega um(a) "+item.nome+ "do buraco"
-                        else:
-                            item = get_money()
-                            jogador.receberMoeda(item)
-                            txt = "(Teste de sorte:Sucesso)\nVocê pega "+str(item)+" moedas"
-                    else:
-                        txt = "(Teste de sorte:Falha)\nÁ instantes de pegar o que quer que brilhace na fenda,\nSua face é tomada por horro, no que o brilho piscou\nUm braço te agarra da penumbra\nGarras afundam na sua pele e você solta um grito\nVocê saca sua arma e espanta a criatura de volta ás trevas\n(-3 de vida)"
-                        jogador.perderVida(3)
-                else:
-                    txt = "No que você saia, você conseguiu ouvir\num murmurio gutural vindo do buraco\nVocê sai da sala a passos rapidos"
-                    btn1T = ">"
-                    btn2T = ""
-                    label.config(text=txt)
-                    self.btn1.config(text=btn1T,command=partial(self.destruir_Tela_evento,frame))
-                    self.btn2.config(text=btn2T)
+                self.EmCombate = Evneto_combate_respsota(btn, self.btn1, txt, teste, jogador, btn1T, Criar_Tela_Combat, get_Inimigo, frame, label)
             
-            label.config(text=txt)
-    
-    def alterar_estado_entrada(self, linha, coluna, novo_estado):
-        for coord in self.coordenadas:
-            if coord["linha"] == linha and coord["colune"] == coluna:
-                coord["Entrada"] = novo_estado
+            elif tipo == 3:
+                tesouro_respsota(btn,self.btn1,txt,teste,jogador,btn1T,Criar_Tela_Combat,get_money,get_Armamento,frame,label)
+            
+            elif tipo == 4:
+                fenda_repsosta(btn,self.btn1,self.btn2,txt,teste,jogador,btn1T,label,get_money,get_Consumivel,frame,self.destruir_Tela_evento)
     
     def destruir_Tela_evento(self, frame):
         frame.destroy()
-        self.EmEvento = False 
+
+        self.EmEvento = False
+
+        print("\n->destruir_Tela_evento:")
+        print(self.EmEvento)
+
         atualizar_Mapa()
+
+        print("\n-> 3 destruir_Tela_evento:")
+        print(self.EmEvento)
+
         Atualizar_Dados()
 
     def copiar(self):
@@ -572,21 +473,34 @@ def movimentar(comando):
 
 def atualizar_Mapa():
     global frame_imagens
+    
+    print("->2 mapa_copiado.EmEvento:")
+    print(mapa_copiado.EmEvento)
+
     if frame_imagens:
-        frame_imagens.destroy()  # Remove o frame anterior
-    
+        print("Destruiu o frame:")
+        frame_imagens.destroy()
+        frame_imagens = None
+
+        print("->3 mapa_copiado.EmEvento:")
+        print(mapa_copiado.EmEvento)
+
     frame_imagens = mapa_copiado.exibir_area_com_imagens(viewX, viewY, imagens)
-    
-    if mapa_copiado.EmEvento is not True:
+
+    print("->4 mapa_copiado.EmEvento:")
+    print(mapa_copiado.EmEvento)
+
+    if mapa_copiado.EmEvento != True:
         frame_imagens = mapa_copiado.colocar_Jogador(
             frame_imagens,
             jogador,
             mapa_copiado.x - max(0, mapa_copiado.x - viewX // 2),
             mapa_copiado.y - max(0, mapa_copiado.y - viewY // 2),
         )
+        print("Era pra aparecer")
 
-    if frame_imagens:
-        frame_imagens.place(relx=0.35, rely=0.45, anchor="center")
+    
+    frame_imagens.place(relx=0.35, rely=0.45, anchor="center")
 
 def redimensionarImagem(caminho,x,y):
     imagem = Image.open(caminho)
@@ -1043,10 +957,10 @@ def atualizarAtributo():
         Config.labelAtributo[i].config(text=(nome + ":" + str(valor)))
 
 def Subitrair_Aumentar_Atributo(atributos, nome, pontos, label, labelPontos, varSelecionada):
-    atributo = varSelecionada.get()  # Obtém o nome do atributo selecionado
+    atributo = varSelecionada.get()
 
     if atributo:
-        if atributo in ["HP", "MP"]:  # HP e MP aumentam em 2 e não têm limite de 9
+        if atributo in ["HP", "MP"]:
             incremento = 2
         else:
             incremento = 1
@@ -1068,7 +982,7 @@ def Criar_Lable_radio(frame, nome, atributos, row, varSelecionada, label):
     labelValor = tk.Label(frame, text=str(atributos[nome]), bg="black", fg="white", font=("Arial", 12))
     labelValor.grid(row=row, column=2, padx=6, pady=6)
     
-    label[nome] = labelValor  # Salva o label do atributo para atualizações
+    label[nome] = labelValor 
 
 def Tela_de_atributos():
     pontos = jogador.AumentarLevel()
@@ -1158,14 +1072,14 @@ def tela_morte():
     if Config.frame_jogador != None:
         Config.frame_jogador.destroy()
     
-    Config.frame_morte = tk.Frame()
-    Config.frame_morte.pack()
+    Config.frame_morte = tk.Frame(bg="black", relief="ridge", highlightbackground="white", highlightthickness=2)
+    Config.frame_morte.place(relx=0.5, rely=0.5, anchor="center")
 
-    label = tk.Label(Config.frame_morte,text="Você morreu")
-    label.pack()
+    label = tk.Label(Config.frame_morte,text="Você morreu",bg="black", fg="white", font=("Arial", 30))
+    label.grid(row=1, column=0, padx=50, pady=50)
 
-    btn = tk.Button(Config.frame_morte, text=">", command=partial(Reinicio,False,Config.frame_morte))
-    btn.pack()
+    btn = tk.Button(Config.frame_morte, text=">", bg="black", fg="white", command=partial(Reinicio,False,Config.frame_morte), font=("Arial", 20))
+    btn.grid(row=2, column=0, padx=12, pady=12)
     
 
 def get_Inimigo():
@@ -1201,7 +1115,7 @@ def get_Consumivel():
     return item
 
 def get_Runa():
-    itens = [Envenenamento, Queimadura, sangramento, Sangria, Congelamento, Imprecisão]
+    itens = [Envenenamento, Queimadura, sangramento, Sangria, Congelamento, Atordoamento]
     item = random.choices(itens,k=1)[0] 
     return item
 
@@ -1332,27 +1246,30 @@ def frame_classes():
                                    command=partial(colocar_atributos, classes_selecionadas, frame), width=60)
             btnProximo.pack()
     
-    frame = tk.Frame(root, bg="black")
+    frame = tk.Frame(root, bg="black", relief="ridge", highlightbackground="white", highlightthickness=2)
     frame.place(relx=0.5, rely=0.5, anchor="center")
     
-    frame_categorias = tk.Frame(frame, bg="black", relief="ridge", highlightbackground="white", highlightthickness=4)
+    frame_categorias = tk.Frame(frame, bg="black")
     frame_categorias.pack()
     
     Btn_frame = tk.Frame(frame, bg="black")
     Btn_frame.pack()
     
     for j, secao in enumerate(radio_secao):
-        frame_tipo = tk.Frame(frame_categorias, bg="black")
+        frame_tipo = tk.Frame(frame_categorias, bg="black", relief="ridge", highlightbackground="white", highlightthickness=4)
         frame_tipo.pack()
         
-        labelTipo = tk.Label(frame_tipo, bg="black", fg="white", font=("Arial", 15), text=secao["tipo"])
+        frame_label = tk.Frame(frame_categorias, bg="black")
+        frame_label.pack()
+
+        labelTipo = tk.Label(frame_label, bg="black", fg="white", font=("Arial", 15), text=secao["tipo"])
         labelTipo.pack()
         
-        frame_info_Classes = tk.Frame(frame_categorias, bg="black")
+        frame_info_Classes = tk.Frame(frame_categorias, bg="black", relief="ridge", highlightbackground="white", highlightthickness=2)
         frame_info_Classes.pack()
         
-        frame_radio = tk.Frame(frame_info_Classes, bg="black", relief="ridge", highlightbackground="white", highlightthickness=4)
-        frame_dados = tk.Frame(frame_info_Classes, bg="black", relief="ridge", highlightbackground="white", highlightthickness=4)
+        frame_radio = tk.Frame(frame_info_Classes, bg="black")
+        frame_dados = tk.Frame(frame_info_Classes, bg="black")
         
         info = tk.Label(frame_dados, justify="left", bg="black", fg="white", font=("Arial", 12), width=75, height=10)
         

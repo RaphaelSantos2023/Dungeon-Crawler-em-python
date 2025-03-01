@@ -146,7 +146,7 @@ class Vazo_inimigo(Inimigo):
 class Player:
     def __init__(self):
         self.level = 1
-        self.exp = 230
+        self.exp = 0
         
         self.hp = 0
         self.hpMax = 0
@@ -218,7 +218,8 @@ class Player:
     def get_estado(self):
         txt = ""
         for i in range(len(self.estado)):
-            txt += "- " + f"{self.estado[i].name}: {self.estado[i].description}" +"\n" 
+            print(self.estado[i])
+            txt += "- " + f"{self.estado[i].getnome()}: {self.estado[i].description}" +"\n" 
         
         return txt if self.estado else "Nenhum efeito ativo"
 
