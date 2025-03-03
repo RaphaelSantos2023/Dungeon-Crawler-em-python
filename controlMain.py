@@ -5,15 +5,15 @@ from functools import partial
 import random
 import copy
 
-from modalConsumiveis import Pao,Pano,Poscao
-from modal_arma import Weapon, Faca, Espada, Machado, Arco, Sabre, Lanca, Cajado, Envenenamento,Queimadura,sangramento,Sangria,Congelamento,Atordoamento
-from modal_equipamento import Coroa_de_Elenna, Capa_verdade, Armadura_Aroth, Amuleto_Lunar, Capuz_cultista, Armadura_malha, Armadura_couro, Armadura_ferro
-from modal_magica import Sacrificio_Ithral,Sacrificio_Aroth,Sacrificio_Selena,Sacrificio_Elenna
-from modal import Player, Aranha, Goblin, Kobold, Zombi, Xonnominag,Vazo_inimigo,besta_Yithuyesh, mimico
-from modal_classes import Carreira, Combate, Divindade
+from modal.modalConsumiveis import Pao,Pano,Poscao
+from modal.modal_arma import Weapon, Faca, Espada, Machado, Lanca, Cajado, Envenenamento,Queimadura,Sangramento,Sangria,Congelamento,Atordoamento
+from modal.modal_equipamento import Coroa_de_Elenna, Capa_verdade, Armadura_Aroth, Amuleto_Lunar, Capuz_cultista, Armadura_malha, Armadura_couro, Armadura_ferro
+from modal.modal_magica import Sacrificio_Ithral,Sacrificio_Aroth,Sacrificio_Selena,Sacrificio_Elenna
+from modal.modal import Player, Aranha, Goblin, Kobold, Zombi, Zombi_Controlado,Xonnominag,besta_Yithuyesh
+from modal.modal_classes import Carreira, Combate, Divindade
 
-from control_events_cenario import Bau,Encontro_Fantasma,combate_cenario,Tesouro_suspeito,fenda
-from control_events_conclusao import bau_respsota,Evneto_combate_respsota,tesouro_respsota,fenda_repsosta,fantasma_resposta
+from control.control_events_cenario import Bau,Encontro_Fantasma,combate_cenario,Tesouro_suspeito,fenda,Criatura_Escuro
+from control.control_events_conclusao import bau_respsota,Evneto_combate_respsota,tesouro_resposta,fenda_repsosta,fantasma_resposta,Dormindo_reposta
 
 class Config:
     frame_jogador = None
@@ -357,9 +357,9 @@ class Mapa:
         return frame
     
     def selecionar_evento(self):
-        peso = [1,1,3,2,2]
+        peso = [1,1,3,2,2,2]
 
-        eventos = [Bau,Encontro_Fantasma, combate_cenario,Tesouro_suspeito,fenda]
+        eventos = [Bau,Encontro_Fantasma, combate_cenario,Tesouro_suspeito,fenda,Criatura_Escuro]
 
         eventos_escolhido = random.choices(eventos, weights=peso, k=1)[0]
 
@@ -403,23 +403,21 @@ class Mapa:
                 self.EmCombate = Evneto_combate_respsota(btn, self.btn1, txt, teste, jogador, btn1T, Criar_Tela_Combat, get_Inimigo, frame, label)
             
             elif tipo == 3:
-                tesouro_respsota(btn,self.btn1,txt,teste,jogador,btn1T,Criar_Tela_Combat,get_money,get_Armamento,frame,label)
+                tesouro_resposta(btn, self.btn1, txt, teste, jogador, btn1T, Criar_Tela_Combat, get_money, frame, label)
             
             elif tipo == 4:
                 fenda_repsosta(btn,self.btn1,self.btn2,txt,teste,jogador,btn1T,label,get_money,get_Consumivel,frame,self.destruir_Tela_evento)
+            
+            elif tipo ==5:
+                Dormindo_reposta(btn,self.btn1,txt,teste,jogador,btn1T,label,get_Inimigo,Criar_Tela_Combat,frame,self.destruir_Tela_evento,get_money,get_Consumivel)
+            
     
     def destruir_Tela_evento(self, frame):
         frame.destroy()
 
         self.EmEvento = False
 
-        print("\n->destruir_Tela_evento:")
-        print(self.EmEvento)
-
         atualizar_Mapa()
-
-        print("\n-> 3 destruir_Tela_evento:")
-        print(self.EmEvento)
 
         Atualizar_Dados()
 
@@ -453,7 +451,11 @@ def refazer_mapa(frame):
 
     Config.andar += 1
 
-    mapa_copiado = Mapa(20, 20)
+    fator_crescimento = 2
+    largura = 20 + Config.andar * fator_crescimento
+    altura = 20 + Config.andar * fator_crescimento
+
+    mapa_copiado = Mapa(largura, altura)
     coordenadas_q = mapa_copiado.adicionar_qs_aleatorios(10)
     mapa_copiado.adicionar_entrada_saida()
     mapa_copiado.conectar_qs(coordenadas_q)
@@ -473,22 +475,12 @@ def movimentar(comando):
 
 def atualizar_Mapa():
     global frame_imagens
-    
-    print("->2 mapa_copiado.EmEvento:")
-    print(mapa_copiado.EmEvento)
 
     if frame_imagens:
-        print("Destruiu o frame:")
         frame_imagens.destroy()
         frame_imagens = None
 
-        print("->3 mapa_copiado.EmEvento:")
-        print(mapa_copiado.EmEvento)
-
     frame_imagens = mapa_copiado.exibir_area_com_imagens(viewX, viewY, imagens)
-
-    print("->4 mapa_copiado.EmEvento:")
-    print(mapa_copiado.EmEvento)
 
     if mapa_copiado.EmEvento != True:
         frame_imagens = mapa_copiado.colocar_Jogador(
@@ -497,8 +489,6 @@ def atualizar_Mapa():
             mapa_copiado.x - max(0, mapa_copiado.x - viewX // 2),
             mapa_copiado.y - max(0, mapa_copiado.y - viewY // 2),
         )
-        print("Era pra aparecer")
-
     
     frame_imagens.place(relx=0.35, rely=0.45, anchor="center")
 
@@ -513,7 +503,9 @@ def Criar_Tela_Combat(inimigo, root):
 
     Config.frame_desc = tk.Frame(bg="black", relief="ridge", highlightbackground="white", highlightthickness=4)
     Config.frame_desc.place(relx=0.35, rely=0.45, anchor="center")
-    
+
+    Dados_Inimigo(inimigo)
+
     frame_inimigo  = tk.Frame(Config.frame_desc,bg="black")
     frame_inimigo.pack()
 
@@ -534,8 +526,6 @@ def Criar_Tela_Combat(inimigo, root):
 
     LabelDescri.insert("end", "A batalha começou!")
     LabelDescri.config(state="disabled")
-
-    Dados_Inimigo(inimigo)
 
     Frame_inimigo = tk.Frame(frame_inimigo,bg="black", relief="ridge", highlightbackground="white", highlightthickness=4)
     Frame_inimigo.grid(row=1, column=1, padx=2, pady=2)
@@ -666,13 +656,13 @@ def Dados_Inimigo(inimigo):
         Config.frame_Inimigo.destroy()
         Config.frame_Inimigo = None
 
-    Config.frame_Inimigo = tk.Frame(Config.frame_desc,bg="red", relief="ridge", highlightbackground="white", highlightthickness=4)
-    Config.frame_Inimigo.place(relx=0.8, rely=0.15, anchor="center")
+    Config.frame_Inimigo = tk.Frame(Config.frame_desc,bg="black")
+    Config.frame_Inimigo.pack()
 
-    Config.labelHPInimigo = tk.Label(Config.frame_Inimigo, text="HP:"+str(inimigo.hp),bg="black",fg="white",font=("Arial", 12))
+    Config.labelHPInimigo = tk.Label(Config.frame_Inimigo, text="HP:"+str(inimigo.hp),bg="black",fg="white",font=("Arial", 18))
     Config.labelHPInimigo.grid(row=0, column=2, padx=6, pady=6)
 
-    labelNome = tk.Label(Config.frame_Inimigo,text=inimigo.nome,bg="black",fg="white",font=("Arial", 12))
+    labelNome = tk.Label(Config.frame_Inimigo,text=inimigo.nome,bg="black",fg="white",font=("Arial", 18))
     labelNome.grid(row=0, column=0, padx=6, pady=6)
 
 def Tela_vitoria(caso, personagem, adversario):
@@ -740,10 +730,9 @@ def reiniciar_jogo():
     mapa_copiado.conectar_entrada_saida(coordenadas_q)
 
     jogador = Player() 
-    jogador.exp = 0  # Zerar a experiência
-    jogador.fund = 0  # Zerar os funds
+    jogador.exp = 0
+    jogador.fund = 0
 
-    # Reiniciar a interface de atributos
     frame_classes()
 
     frame_imagens = mapa_copiado.exibir_area_com_imagens(viewX, viewY, imagens)
@@ -805,9 +794,6 @@ def Dados_item(item, frame, i, root):
 
 def Uso_do_item(item,tipo,i,root):
 
-    print("Uso de item")
-    print('\n')
-    print(tipo)
     Config.frame_ItemDados.destroy()
     Config.frame_ItemDados = None
 
@@ -1088,8 +1074,9 @@ def get_Inimigo():
         (Kobold(), 2, 5, 2),   # Aparece do andar 2 ao 5 (peso 2)
         (Aranha(), 1, 7, 3),   # Aparece do andar 3 ao 7 (peso 2)
         (Zombi(), 2, 10, 2),   # Aparece do andar 4 ao 10 (peso 2)
-        (Xonnominag(), 4, 12, 2),  # Aparece a partir do andar 6 (peso 1)
-        (besta_Yithuyesh(),6,14,2)
+        (Xonnominag(), 4, 12, 2),
+        (besta_Yithuyesh(),5,14,2),
+        (Zombi_Controlado(),4,20,3)
     ]
 
     # Filtra os inimigos que podem aparecer no andar atual
@@ -1115,7 +1102,7 @@ def get_Consumivel():
     return item
 
 def get_Runa():
-    itens = [Envenenamento, Queimadura, sangramento, Sangria, Congelamento, Atordoamento]
+    itens = [Envenenamento, Queimadura, Sangramento, Sangria, Congelamento, Atordoamento]
     item = random.choices(itens,k=1)[0] 
     return item
 
@@ -1157,7 +1144,6 @@ def colocar_atributos(classes_selecionadas, frame):
     jogador.mp = jogador.mpMax
 
     if Config.labelAtributo != []:
-        print("destroy")
         Config.labelAtributo = []
     
     Config.frame_jogador = Status(root)
@@ -1238,7 +1224,7 @@ def frame_classes():
         
         for i, secao in enumerate(radio_secao):
             secao["Estado"] = i == index_secao
-        print(classes_selecionadas)
+
         if all(classes_selecionadas.values()):
             if btnProximo:
                 btnProximo.destroy()

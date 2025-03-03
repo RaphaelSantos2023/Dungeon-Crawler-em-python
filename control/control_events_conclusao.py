@@ -1,5 +1,5 @@
 from functools import partial
-from modal import Player, Aranha, Goblin, Kobold, Zombi, Xonnominag,Vazo_inimigo,besta_Yithuyesh, mimico
+from modal.modal import Vazo_inimigo, mimico
 import random
 
 def bau_respsota(btn,btn1,btn2,label,txt,teste,jogador,btn1T,get_money,get_Consumivel,frame,destruir_Tela_evento):             
@@ -50,18 +50,15 @@ def Evneto_combate_respsota(btn, btn1, txt, teste, jogador, btn1T, Criar_Tela_Co
     label.config(text=txt)
     return EmCombate
 
-def tesouro_respsota(btn, btn1, txt, teste, jogador, btn1T, Criar_Tela_Combat, get_money, get_Armamento, frame, label):
+def tesouro_resposta(btn, btn1, txt, teste, jogador, btn1T, Criar_Tela_Combat, get_money, frame, label):
     
     EmCombate = False
 
     if btn == 1:
         if jogador.wis >= teste:
             dinheiro = get_money()
-            arma = get_Armamento()
-
-            jogador.AddInventario(arma)
             jogador.receberMoeda(dinheiro)
-            txt = "(Teste de Sabedoria:Sucesso)\nVocê pegou "+ str(dinheiro)+" moedas e "+ arma.nome
+            txt = "(Teste de Sabedoria:Sucesso)\nVocê pegou "+ str(dinheiro)+" fund"
         else:
             txt = "(Teste de Sabedoria:Falha)\nAs moedas se desmancham e escorrem dos dedos\nNuma massa negra e pútrida.\nUm mau presentimento se sufoca na garganta\nAlgo de ruim te acompanha das sombras"
             EmCombate = True  # Ativa combate
@@ -90,17 +87,17 @@ def fantasma_resposta(btn,jogador,teste,txt,label):
 def fenda_repsosta(btn,btn1,btn2,txt,teste,jogador,btn1T,label,get_money,get_Consumivel,frame,destruir_Tela_evento):
     if btn == 1:
         if jogador.lck >= teste:
-            peso = [1,4]
+            peso = [1,2]
             tesouro = random.choices(["Consumivel","dineiro"], weights=peso,k=1)
 
-            if tesouro == "Arma":
+            if tesouro == "Consumivel":
                 item = get_Consumivel()
                 jogador.AddInventario(item)
                 txt = "(Teste de sorte:Sucesso)\nVocê pega um(a) "+item.nome+ "do buraco"
             else:
                 item = get_money()
                 jogador.receberMoeda(item)
-                txt = "(Teste de sorte:Sucesso)\nVocê pega "+str(item)+" moedas"
+                txt = "(Teste de sorte:Sucesso)\nVocê pega "+str(item)+" fund"
         else:
                         txt = "(Teste de sorte:Falha)\nÁ instantes de pegar o que quer que brilhace na fenda,\nSua face é tomada por horro, no que o brilho piscou\nUm braço te agarra da penumbra\nGarras afundam na sua pele e você solta um grito\nVocê saca sua arma e espanta a criatura de volta ás trevas\n(-3 de vida)"
                         jogador.perderVida(3)
@@ -111,4 +108,31 @@ def fenda_repsosta(btn,btn1,btn2,txt,teste,jogador,btn1T,label,get_money,get_Con
         label.config(text=txt)
         btn1.config(text=btn1T,command=partial(destruir_Tela_evento,frame))
         btn2.config(text=btn2T)
+    label.config(text=txt)
+
+def Dormindo_reposta(btn,btn1,txt,teste,jogador,btn1T,label,get_Inimigo,Criar_Tela_Combat,frame,destruir_Tela_evento,get_money,get_Consumivel):
+    if btn == 1:
+        if jogador.dex >= teste:
+            txt = "(Teste de Dextreza:Sucesso)\nCom caltela, você\nse esgueira pela sala,\ndeixando os barulhos para trás"
+            btn1.config(text=btn1T,command=partial(destruir_Tela_evento,frame))
+        else:
+            txt = "(Teste de Dextreza:Falha)\nVocê se esgueirou pela penumbra.\nMas, num passo em falso,\nparte do chão dessaba\npras camadas mais baixas\nda Masmorra.\nA criatura acordou"
+            btn1T = "Avançar"
+            btn1.config(text=btn1T, command=partial(Criar_Tela_Combat, get_Inimigo(), frame))
+    else:
+        if jogador.str>= teste:
+            peso = [1,2]
+            tesouro = random.choices(["Consumivel","dineiro"], weights=peso,k=1)
+            txt = "(Teste de Força:Sucesso)\nVocê ergue sua arma\ne executa a criatura num\nunico golpe"
+
+            if tesouro == "Consumivel":
+                item = get_Consumivel()
+                jogador.AddInventario(item)
+                txt += "( +"+str(item)+" )"
+            else:
+                item = get_money()
+                jogador.receberMoeda(item)
+                txt += "( +"+str(item)+" fund)"
+            
+            btn1.config(text=btn1T,command=partial(destruir_Tela_evento,frame))
     label.config(text=txt)

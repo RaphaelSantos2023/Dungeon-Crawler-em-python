@@ -7,7 +7,7 @@ def Bau():
     return label,btn1,btn2,evento
 
 def Encontro_Fantasma():
-    label = "De subito, você para.\nO cheiro de enchofre invade seu olfato.\nVocê algussa o ouvido no que parece ser uma voz sussurando, como uma brisa gelida.\n"
+    label = "De subito, você para.\nO cheiro de enchofre invade seu olfato.\nVocê algussa o ouvido no\nque parece ser uma voz\nsussurando, como uma brisa\ngelida.\n"
     btn1 = "Ouvir"
     btn2 = "Fugir"
     evento = 1
@@ -35,5 +35,13 @@ def fenda():
     btn1 = "Tentar pegar o objeto"
     btn2 = "Ignorar"
     evento = 4
+
+    return label,btn1,btn2,evento
+
+def Criatura_Escuro():
+    label = "Do escuro da sala,\nVocê ouve os barulhos\nde alguma criatura.\nEla parece estar dorindo"
+    btn1 = "Passar furtivo"
+    btn2 = "Atacar"
+    evento = 5
 
     return label,btn1,btn2,evento

@@ -1,7 +1,7 @@
 import random
-from modalConsumiveis import Pao,Pano,Poscao
-from modal_arma import Envenenamento, Sangria
-from modal_magica import Sacrificio_Aroth
+from modal.modalConsumiveis import Pao,Pano,Poscao
+from modal.modal_arma import Envenenamento, Sangria,Sangramento
+from modal.modal_magica import Sacrificio_Aroth
 
 class Inimigo:
     def __init__(self, nome, hp_base, dano, exp, str_base, dex, cha, fund, crit_chance,efeito, simbolo):
@@ -44,7 +44,8 @@ class Inimigo:
             target.hp -= base_damage
 
             if self.efeito and self.efeito not in target.estado:
-                target.estado.append(self.efeito)
+                for efeito in self.efeito:
+                    target.estado.append(efeito)
         elif target.defendendo:
 
             tentativa = self.tentar_Quebrar_Defesa()
@@ -107,6 +108,10 @@ class Xonnominag(Inimigo):
 class Zombi(Inimigo):
     def __init__(self):
         super().__init__("Zombi", 15, 3, 15, 5, 4, 6, 2, 0.05, None,"img/Personagens/zombi.png")
+
+class Zombi_Controlado(Inimigo):
+    def __init__(self):
+        super().__init__("Zombi Controlado", 15, 5, 35, 7, 7, 7, 6, 0.39, [Sangramento],"img/Personagens/zombi_controlado.png")
 
 class Kobold(Inimigo):
     def __init__(self):
@@ -207,19 +212,17 @@ class Player:
                 self.turnos_c_efeito = 0
             else:
                 self.turnos_c_efeito +=1
-                
-                for efeito in self.estado[i]:
-                    if efeito == Sangria:
-                       txt += efeito.apply_effect(self,inimigo)
-                    else:
-                        txt += efeito.apply_effect(self)
+                if self.estado[i] == Sangria:
+                    txt += self.estado[i].apply_effect(self,inimigo)
+                else:
+                    txt += self.estado[i].apply_effect(self)
         return txt
     
     def get_estado(self):
         txt = ""
         for i in range(len(self.estado)):
             print(self.estado[i])
-            txt += "- " + f"{self.estado[i].getnome()}: {self.estado[i].description}" +"\n" 
+            txt += f"{self.estado[i].nome} : {self.estado[i].description}"
         
         return txt if self.estado else "Nenhum efeito ativo"
 

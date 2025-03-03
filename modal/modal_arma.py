@@ -11,7 +11,7 @@ class Effect:
         return self.apply_effect(target)
 
     def __str__(self):
-        return f"{self.getnome}: {self.description}"
+        return f"{self.getnome}: {self.description}\n"
     
     def getnome(self):
         return self.nome
@@ -64,7 +64,7 @@ Atordoamento = Effect(name="Atordoamento", description="Reduz a precisão do ini
 Congelamento = Effect(name="Congelamento", description="Reduz a destreza do alvo em 1 ponto.", tipo="Atributos", preco=8, apply_effect=freeze_effect)
 Sangria = Effect(name="Sangria", description="Causa 2 de dano e dá 2 de vida ao usuario.", tipo="Vida e Dano", preco=6, apply_effect=sangria_effect)
 
-sangramento = Effect(name="Sangramento", description="Causa 7 de dano contínuo.",tipo="Dano", preco=6, apply_effect=bleed_effect)
+Sangramento = Effect(name="Sangramento", description="Causa 7 de dano contínuo.",tipo="Dano", preco=6, apply_effect=bleed_effect)
 Queimadura = Effect(name="Queimadura", description="Causa 4 de dano contínuo.", tipo="Dano",preco=6,apply_effect=fire_effect)
 Envenenamento = Effect(name="Envenenamento",description="Causa 2 de dano continuo", tipo="Dano", preco=6, apply_effect=poison_effect)
 
@@ -86,7 +86,7 @@ class Machado(Weapon):
 
 class Lanca(Weapon):
     def __init__(self):
-        super().__init__(name="Lança", weapon_type="Arma", damage=4, weight=4, special_effect=[sangramento] , crit_chance=0.3,preco=20)
+        super().__init__(name="Lança", weapon_type="Arma", damage=4, weight=4, special_effect=[Sangramento] , crit_chance=0.3,preco=20)
 
 class Sabre(Weapon):
     def __init__(self):
