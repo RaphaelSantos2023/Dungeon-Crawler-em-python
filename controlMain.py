@@ -82,8 +82,6 @@ class Mapa:
         self.contador_eventos = 0
 
         self.Coord_caminho =  []
-
-        self.lista_Eventos = ["Bau","Sussuros","Emboscada","Tesouro Amaldiçoado","Vala"]
         
         self.x= None
         self.y = None
@@ -287,7 +285,7 @@ class Mapa:
 
                 tipo = 0
                 frame = tk.Frame(bg="black", relief="ridge", highlightbackground="white", highlightthickness=4)
-                self.Criar_Tela(frame, btn1, btn2, label, tipo)
+                self.Criar_Tela(frame, btn1, btn2, "img/eventos/inicio/Bau.png",label, tipo)
 
         return frame
     
@@ -328,24 +326,37 @@ class Mapa:
         frame = tk.Frame(bg="black", relief="ridge", highlightbackground="white", highlightthickness=4,width=400,height=150)
         
         if evento == "saída":
+            img = "img/eventos/Inicio/evento.png"
             txt = "Uma escadaria espiralaza desce a penumbra.\nCheios putridos emergem da passagem,\narrebatando os sentidos\nDeseja descee?"
             btn1T = "Sim"
             btn2T = "Não"
             tipo= "Saida"
 
         if evento == "Quarto":       
-            txt,btn1T,btn2T,tipo = self.selecionar_evento()
+            img,txt,btn1T,btn2T,tipo = self.selecionar_evento()
         
-        return self.Criar_Tela(frame,btn1T,btn2T,txt,tipo)
+        return self.Criar_Tela(frame,btn1T,btn2T,img,txt,tipo)
 
-    def Criar_Tela(self,frame,btn1T,btn2T,txt,tipo):
-        frame_lbl = tk.Frame(frame,bg="black")
-        frame_lbl.pack()
+    def Criar_Tela(self,frame,btn1T,btn2T,img,txt,tipo):
+        frame_geral = tk.Frame(frame,bg="black")
+        frame_geral.pack()
+
+        imgM = redimensionarImagem(img, 400, 300)
+
+        frame_img = tk.Frame(frame_geral,bg="black")
+        frame_img.grid(row=1, column=1, padx=2, pady=2)
+
+        ImagemEvento = tk.Label(frame_img, image=imgM, bg="black")
+        ImagemEvento.image = imgM
+        ImagemEvento.pack()
+
+        frame_lbl = tk.Frame(frame_geral,bg="black")
+        frame_lbl.grid(row=1, column=2, padx=2, pady=2)
 
         label = tk.Label(frame_lbl, text=txt,bg="black",fg="white", highlightthickness=4, highlightbackground="black",padx=50, pady=25,font=("Arial", 15))
         label.pack()
 
-        frame_btn = tk.Frame(frame,bg="black")
+        frame_btn = tk.Frame(frame_lbl,bg="black")
         frame_btn.pack()
         
         self.btn1 = tk.Button(frame_btn,text=btn1T,bg="black",fg="white",borderwidth=3, relief="sunken",padx=50, pady=25,command=partial(self.Metodo_resposta,tipo,frame,label,1),width=10)
@@ -363,9 +374,9 @@ class Mapa:
 
         eventos_escolhido = random.choices(eventos, weights=peso, k=1)[0]
 
-        label,btn1,btn2,evento = eventos_escolhido()
+        img,label,btn1,btn2,evento = eventos_escolhido()
 
-        return label,btn1,btn2,evento
+        return img,label,btn1,btn2,evento
     
     def Metodo_resposta(self,tipo,frame,label,btn):
 
@@ -614,8 +625,8 @@ def Acao(personagem, adiversario, tipo):
         acerto = personagem.Fugir(adiversario)
         if acerto:
             txt = f"\n- {personagem.nome} fugiu com sucesso."
-            Config.saida_batalha = True
-            return
+            adiversario.hp = 0
+            Config.saida_batalha = "Fuga"
         else:
             txt = f"\n- {personagem.nome} falhou ao fugir."
     
@@ -670,7 +681,7 @@ def Tela_vitoria(caso, personagem, adversario):
     Config.frame_desc.destroy()
     Config.frame_Inimigo.destroy()
 
-    frame = tk.Frame(root,bg="yellow", relief="ridge", highlightbackground="white", highlightthickness=4, width=100, height= 100)
+    frame = tk.Frame(root,bg="black", relief="ridge", highlightbackground="white", highlightthickness=4, width=100, height= 100)
     frame.place(relx=0.5, rely=0.5, anchor="center")
 
     btn1T = ">"

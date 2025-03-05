@@ -293,8 +293,9 @@ class Player:
         
     def Fugir(self, inimigo):
         dice = random.randrange(1,7)
+        diceEn = random.randrange(1,7)
 
-        if self.dex +dice <= inimigo.dex:
+        if self.dex +dice <= inimigo.dex + diceEn:
             return True
         return False
     

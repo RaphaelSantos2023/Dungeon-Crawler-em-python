@@ -21,7 +21,7 @@ def bau_respsota(btn,btn1,btn2,label,txt,teste,jogador,btn1T,get_money,get_Consu
             
             txt += item + sufixo
         else:
-            txt = "(Teste de sorte:Falha)\nNo que você abre, dentes amolados\nagarram seu braço e puxam pra dentro\n(-2 de vida)\nVocê se contorce e grita, mas consegue tirar seu braço\nO mimico avança na sua direção"
+            txt = "(Teste de sorte:Falha)\nNo que você abre,\ndentes amolados agarram seu braço\ne puxam pra dentro\n(-2 de vida)\nVocê se contorce e grita,\nmas consegue tirar seu braço\nO mimico avança na sua direção"
             jogador.perderVida(2)
     else:
         txt = "Você saí do quarto"
@@ -60,7 +60,7 @@ def tesouro_resposta(btn, btn1, txt, teste, jogador, btn1T, Criar_Tela_Combat, g
             jogador.receberMoeda(dinheiro)
             txt = "(Teste de Sabedoria:Sucesso)\nVocê pegou "+ str(dinheiro)+" fund"
         else:
-            txt = "(Teste de Sabedoria:Falha)\nAs moedas se desmancham e escorrem dos dedos\nNuma massa negra e pútrida.\nUm mau presentimento se sufoca na garganta\nAlgo de ruim te acompanha das sombras"
+            txt = "(Teste de Sabedoria:Falha)\nAs moedas se desmancham e\nescorrem dos dedos\nNuma massa negra e pútrida.\nUm mau presentimento se sufoca na garganta\nAlgo de ruim te acompanha das sombras"
             EmCombate = True  # Ativa combate
             inimigoC = random.choice([Vazo_inimigo(), mimico()])
             btn1.config(text=btn1T, command=partial(Criar_Tela_Combat, inimigoC, frame))
@@ -74,14 +74,14 @@ def fantasma_resposta(btn,jogador,teste,txt,label):
     if btn == 1 and jogador.wis >= teste:
         txt = "(Tesde de Sabedoria: Sucesso)\nNão é uma voz, mas varias, em coral.\nA melidiadesencarnada lhe traz paz,\nMesmo num lugar tão sombrio\nQuanto a masmorra\n(+2 mp)"
     elif btn == 2 and jogador.dex >= teste:
-        txt = "(Teste de Dextreza: Sucesso)\nVocê consegue fugir da sala\nsem maiores problemas. Qualquer que fosse a fonte da vozes\nprovavelmente não é coisa boa.\nNada nessa masmorra é boa"
+        txt = "(Teste de Dextreza: Sucesso)\nVocê consegue fugir da sala\nsem maiores problemas.\nQualquer que fosse a fonte da vozes\nprovavelmente não é coisa boa.\nNada nessa masmorra é boa"
     else:
         txt = ""
         if btn== 2:
             txt="(Teste de Dextreza: Falha)\nNão importa o quanto você corra, a voz se agrava em uma crescente."
         else:
             txt="(Teste de Sabedoria: Falha)"
-        txt+="\nVocê percebe que não são vozes, mas gritos.\nUm pandemonio de almas condenadas berrão em dor.\nO horror e exaustão te levam aos joelhos.\nVocê desmaia.\nAo acordar, as vozes sairam, mas o eco\nde seu sofrimento vai permanecer pra sempre com você\n(- 3 mp)"
+        txt+="\nVocê percebe que não\nsão vozes, mas gritos. Um pandemonio\nde almas condenadas berrão em dor.\nO horror e exaustão te levam aos joelhos.\nVocê desmaia.\nAo acordar, as vozes sairam, mas o eco\nde seu sofrimento vai\npermanecer pra sempre com você\n(- 3 mp)"
     label.config(text=txt)
 
 def fenda_repsosta(btn,btn1,btn2,txt,teste,jogador,btn1T,label,get_money,get_Consumivel,frame,destruir_Tela_evento):
@@ -99,8 +99,8 @@ def fenda_repsosta(btn,btn1,btn2,txt,teste,jogador,btn1T,label,get_money,get_Con
                 jogador.receberMoeda(item)
                 txt = "(Teste de sorte:Sucesso)\nVocê pega "+str(item)+" fund"
         else:
-                        txt = "(Teste de sorte:Falha)\nÁ instantes de pegar o que quer que brilhace na fenda,\nSua face é tomada por horro, no que o brilho piscou\nUm braço te agarra da penumbra\nGarras afundam na sua pele e você solta um grito\nVocê saca sua arma e espanta a criatura de volta ás trevas\n(-3 de vida)"
-                        jogador.perderVida(3)
+            txt = "(Teste de sorte:Falha)\nÁ instantes de pegar o\nque quer que brilhace\nna fenda. Sua face é\ntomada por horro,\nno que o brilho piscou\nUm braço te agarra da penumbra\nGarras afundam na sua pele\ne você solta um grito\nVocê saca sua arma e espanta\na criatura de volta ás trevas\n(-3 de vida)"
+            jogador.perderVida(3)
     else:
         txt = "No que você saia, você conseguiu ouvir\num murmurio gutural vindo do buraco\nVocê sai da sala a passos rapidos"
         btn1T = ">"
