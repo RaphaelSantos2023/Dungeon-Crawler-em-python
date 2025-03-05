@@ -326,7 +326,7 @@ class Mapa:
         frame = tk.Frame(bg="black", relief="ridge", highlightbackground="white", highlightthickness=4,width=400,height=150)
         
         if evento == "saída":
-            img = "img/eventos/Inicio/evento.png"
+            img = "img/eventos/Inicio/Saida_evento.png"
             txt = "Uma escadaria espiralaza desce a penumbra.\nCheios putridos emergem da passagem,\narrebatando os sentidos\nDeseja descee?"
             btn1T = "Sim"
             btn2T = "Não"
@@ -1066,8 +1066,13 @@ def get_Armamento():
 
 def tela_morte():
 
+    global frame_imagens
+
     if Config.frame_jogador != None:
         Config.frame_jogador.destroy()
+    
+    if frame_imagens != None:
+        frame_imagens.destroy()
     
     Config.frame_morte = tk.Frame(bg="black", relief="ridge", highlightbackground="white", highlightthickness=2)
     Config.frame_morte.place(relx=0.5, rely=0.5, anchor="center")
