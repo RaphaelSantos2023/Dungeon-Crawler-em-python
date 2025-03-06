@@ -44,7 +44,7 @@ def fenda():
     return img,label,btn1,btn2,evento
 
 def Criatura_Escuro():
-    img = "img/eventos/inicio/Bau.png"
+    img = "img/eventos/inicio/Dormindo_event.png"
     label = "Do escuro da sala,\nVocê ouve os barulhos\nde alguma criatura.\nEla parece estar dorindo"
     btn1 = "Passar furtivo"
     btn2 = "Atacar"

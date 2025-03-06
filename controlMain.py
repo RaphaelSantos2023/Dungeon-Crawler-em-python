@@ -1012,7 +1012,7 @@ def Tela_de_atributos():
             jogador.hpMax = atributos["HP"]
             jogador.mpMax = atributos["MP"]
 
-            Config.frame_jogador.destroy()
+            Atualizar_Dados()
 
             Destrui_frame(frame)
 
@@ -1040,9 +1040,9 @@ def Tela_de_atributos():
         btnAumentar.grid(row=row, column=1, padx=6, pady=6)
 
         btnProx = tk.Button(
-            frame, text=">", bg="black", fg="white", font=("Arial", 12),
-            command=partial(Destruir_atualizar, atributos)
-        )
+                frame, text=">", bg="black", fg="white", font=("Arial", 12),
+                command=partial(Destruir_atualizar, atributos)
+            )
         btnProx.grid(row=row, column=3, padx=6, pady=6)
 
         frame.place(relx=0.5, rely=0.5, anchor="center")
@@ -1056,7 +1056,7 @@ def Atualizar_Dados():
         Config.labelHp.config(text="HP: "+str(jogador.hp))
         Config.labelMp.config(text="MP: "+str(jogador.mp))
         Config.labelFund.config(text="Fund: "+str(jogador.fund))
-        Config.labelExp.config(text="exp: "+ str(jogador.exp))
+        Config.labelExp.config(text="Xp: "+ str(jogador.exp))
 
 def get_Armamento():
     itens = [Faca(),Espada(),Machado()]

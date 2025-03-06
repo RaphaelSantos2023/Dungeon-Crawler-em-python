@@ -99,8 +99,8 @@ def fenda_repsosta(btn,btn1,btn2,txt,teste,jogador,btn1T,label,get_money,get_Con
                 jogador.receberMoeda(item)
                 txt = "(Teste de sorte:Sucesso)\nVocê pega "+str(item)+" fund"
         else:
-            txt = "(Teste de sorte:Falha)\nÁ instantes de pegar o\nque quer que brilhace\nna fenda. Sua face é\ntomada por horro,\nno que o brilho piscou\nUm braço te agarra da penumbra\nGarras afundam na sua pele\ne você solta um grito\nVocê saca sua arma e espanta\na criatura de volta ás trevas\n(-3 de vida)"
-            jogador.perderVida(3)
+            txt = "(Teste de sorte:Falha)\nÁ instantes de pegar o\nque quer que brilhace\nna fenda. Sua face é\ntomada por horro,\nno que o brilho piscou\nUm braço te agarra da penumbra\nGarras afundam na sua pele\ne você solta um grito\nVocê saca sua arma e espanta\na criatura de volta ás trevas\n(-2 de vida)"
+            jogador.perderVida(2)
     else:
         txt = "No que você saia, você conseguiu ouvir\num murmurio gutural vindo do buraco\nVocê sai da sala a passos rapidos"
         btn1T = ">"
@@ -135,4 +135,9 @@ def Dormindo_reposta(btn,btn1,txt,teste,jogador,btn1T,label,get_Inimigo,Criar_Te
                 txt += "( +"+str(item)+" fund)"
             
             btn1.config(text=btn1T,command=partial(destruir_Tela_evento,frame))
+        else:
+            txt = "(Teste de Força:Falha)\nVocê ergue sua arma.\nPorém, seus braços congelam\nnos instantes entre\nvocê notar que a criatura\nestava fingindo dormir\ne ela te acertar no peito\n(-2 vida)"
+            jogador.perderVida(2)
+            btn1T = "Avançar"
+            btn1.config(text=btn1T, command=partial(Criar_Tela_Combat, get_Inimigo(), frame))
     label.config(text=txt)

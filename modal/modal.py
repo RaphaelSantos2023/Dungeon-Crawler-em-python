@@ -151,7 +151,7 @@ class Vazo_inimigo(Inimigo):
 class Player:
     def __init__(self):
         self.level = 1
-        self.exp = 0
+        self.exp = 220
         
         self.hp = 0
         self.hpMax = 0
