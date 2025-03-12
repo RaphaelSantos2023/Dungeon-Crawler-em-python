@@ -19,19 +19,19 @@ class Equipamento:
 
 class Armadura_ferro(Equipamento):
     def __init__(self):
-        super().__init__(self,"Armadura de ferro","Armadura de ferro",4,0,None,2,2,0,0,0,0,18)
+        super().__init__("Armadura de ferro","Armadura de ferro","Armadura",4,0,None,2,2,0,0,0,0,18)
 
 class Armadura_couro(Equipamento):
     def __init__(self):
-        super().__init__(self,"Armadura de couro","Armadura de ferro",2,0,None,0,2,0,0,0,4,8)
+        super().__init__("Armadura de couro","Armadura de ferro","Armadura",2,0,None,0,2,0,0,0,4,8)
 
 class Armadura_malha(Equipamento):
     def __init__(self):
-        super().__init__(self,"Armadura de malha","Armadura de ferro",3,0,None,1,2,0,0,0,0,12)
+        super().__init__("Armadura de malha","Armadura de ferro","Armadura",3,0,None,1,2,0,0,0,0,12)
 
 class Capuz_cultista(Equipamento):
     def __init__(self):
-        super().__init__(self,"Capuz de ocultista","Armadura de ferro",1,3,None,0,0,0,1,2,-1,16)
+        super().__init__("Capuz de ocultista","Armadura de ferro","Armadura",1,3,None,0,0,0,1,2,-1,16)
 
 class Amuleto_Lunar(Equipamento):
     def __init__(self):

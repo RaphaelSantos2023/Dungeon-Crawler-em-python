@@ -5,15 +5,15 @@ from functools import partial
 import random
 import copy
 
-from modal.modalConsumiveis import Pao,Pano,Poscao
+from modal.modalConsumiveis import Pao,Pano,Poscao,Raiz_mp
 from modal.modal_arma import Weapon, Faca, Espada, Machado, Lanca, Cajado, Envenenamento,Queimadura,Sangramento,Sangria,Congelamento,Atordoamento
 from modal.modal_equipamento import Coroa_de_Elenna, Capa_verdade, Armadura_Aroth, Amuleto_Lunar, Capuz_cultista, Armadura_malha, Armadura_couro, Armadura_ferro
 from modal.modal_magica import Sacrificio_Ithral,Sacrificio_Aroth,Sacrificio_Selena,Sacrificio_Elenna
 from modal.modal import Player, Aranha, Goblin, Kobold, Zombi, Zombi_Controlado,Xonnominag,besta_Yithuyesh
 from modal.modal_classes import Carreira, Combate, Divindade
 
-from control.control_events_cenario import Bau,Encontro_Fantasma,combate_cenario,Tesouro_suspeito,fenda,Criatura_Escuro
-from control.control_events_conclusao import bau_respsota,Evneto_combate_respsota,tesouro_resposta,fenda_repsosta,fantasma_resposta,Dormindo_reposta
+from control.control_events_cenario import Bau,Encontro_Fantasma,combate_cenario,Tesouro_suspeito,fenda,Criatura_Escuro,Comeciante
+from control.control_events_conclusao import bau_respsota,Evneto_combate_respsota,tesouro_resposta,fenda_repsosta,fantasma_resposta,Dormindo_reposta,comerciante_resposta
 
 class Config:
     frame_jogador = None
@@ -368,9 +368,9 @@ class Mapa:
         return frame
     
     def selecionar_evento(self):
-        peso = [1,1,3,2,2,2]
+        peso = [1,1,3,2,1,2,2]
 
-        eventos = [Bau,Encontro_Fantasma, combate_cenario,Tesouro_suspeito,fenda,Criatura_Escuro]
+        eventos = [Bau,Encontro_Fantasma, combate_cenario,Tesouro_suspeito,fenda,Criatura_Escuro,Comeciante]
 
         eventos_escolhido = random.choices(eventos, weights=peso, k=1)[0]
 
@@ -421,6 +421,9 @@ class Mapa:
             
             elif tipo ==5:
                 Dormindo_reposta(btn,self.btn1,txt,teste,jogador,btn1T,label,get_Inimigo,Criar_Tela_Combat,frame,self.destruir_Tela_evento,get_money,get_Consumivel)
+                
+            elif tipo == 6:
+                comerciante_resposta(btn,self.btn1,txt,label,Tela_comeciante,frame)
             
     
     def destruir_Tela_evento(self, frame):
@@ -748,12 +751,137 @@ def reiniciar_jogo():
 
     frame_imagens = mapa_copiado.exibir_area_com_imagens(viewX, viewY, imagens)
 
+def Tela_comeciante(frame):
+
+    frame.destroy()
+    frame = None
+
+    def Passar_tela():
+        mapa_copiado.EmEvento = False
+
+        atualizar_Mapa()
+        Destrui_frame(frame_geral)
+
+    frame_geral = tk.Frame(bg="black", relief="ridge", highlightbackground="white", highlightthickness=4)
+    frame_geral.place(relx=0.35, rely=0.45, anchor="center")
+
+    frame_descricao = tk.Frame(frame_geral,bg="black")
+    frame_descricao.grid(row= 1,column= 1)
+
+    label_Nome = tk.Label(frame_descricao, text="",bg="black",fg="white",font=("Arial", 15))
+    label_Nome.pack()
+
+    label_description = tk.Label(frame_descricao, text="",bg="black",fg="white",font=("Arial", 15))
+    label_description.pack()
+
+    label_preco = tk.Label(frame_descricao, text="",bg="black",fg="white",font=("Arial", 15))
+    label_preco.pack()
+
+    btn = tk.Button(frame_descricao, text='', bg="black", fg="white", font=("Arial", 12))
+    btn.pack()
+
+    label_Fala = tk.Label(frame_descricao, text="",bg="black",fg="white",font=("Arial", 15))
+    label_Fala.pack()
+
+    btnSaida = tk.Button(frame_descricao, command=partial(Passar_tela), text='>', bg="black", fg="white", font=("Arial", 12))
+    btnSaida.pack()
+
+    def Vender(id,item):
+        jogador.getInventario().pop(id)
+        jogador.fund += item.preco
+        Atualizar_Arrays()
+
+        Atualizar_Dados()
+
+    def Atualizar_Arrays():
+        for widget in frame_jo.winfo_children():
+            widget.destroy()
+        for widget in frame_com.winfo_children():
+            widget.destroy()
+        
+        frames_itens(frame_jo, jogador.getInventario(), "Jogador")
+        frames_itens(frame_com, array_Comerciante, "Comerciante")
+
+    def Comprar(id,item):
+        if jogador.fund >= item.preco:
+            array_Comerciante.pop(id)
+            jogador.fund -= item.preco
+            jogador.getInventario().append(item)
+
+            if label_Fala.cget("text"):
+                label_Fala.config(text="")
+            Atualizar_Dados()
+            Atualizar_Arrays()
+        else:
+            label_Fala.config(text="<Sem fiado, colega>")
+    
+    def Itens(tipo,item,id):
+
+        txt = "Comprar"
+        btn.config(command=partial(Comprar,id,item))
+
+        if tipo == "Jogador":
+            txt = "Vender"
+            btn.config(command=partial(Vender,id,item))
+        
+        label_Nome.config(text = "Nome:" + item.nome)
+        label_description.config(text = item.descricao)
+        label_preco.config(text = "Preço: "+str(item.preco))
+
+        btn.config(text = txt)
+
+    frame_com = tk.Frame(frame_geral,bg="black", relief="ridge", highlightbackground="white", highlightthickness=4)
+    frame_com.grid(row= 1,column= 0)
+
+    def get_random_items():
+        total = random.randint(1, 5)
+        methodos = [get_Consumivel, get_Runa, get_Equipamento]
+        resultado = []
+
+        for _ in range(total):
+            method = random.choice(methodos)
+            resultado.append(method())
+
+        return resultado
+    
+    array_Comerciante = get_random_items()
+
+    frame_jo = tk.Frame(frame_geral,bg="black", relief="ridge", highlightbackground="white", highlightthickness=4)
+    frame_jo.grid(row= 1, column= 2)
+
+    def frames_itens(frame, inventario,tipo):
+        frame_Intermedio = tk.Frame(frame, bg="black")
+        frame_Intermedio.grid(row=0,column=0)
+
+        canvas = tk.Canvas(frame_Intermedio, bg="black",width=300)
+
+        scrollbar = tk.Scrollbar(frame_Intermedio, orient="vertical", command=canvas.yview)
+        scrollable_frame = tk.Frame(canvas, bg="black")
+
+        scrollable_frame.bind(
+            "<Configure>",
+            lambda e: canvas.configure(scrollregion=canvas.bbox("all"))
+        )
+        canvas.create_window((0, 0), window=scrollable_frame, anchor="nw")
+        canvas.configure(yscrollcommand=scrollbar.set)
+
+        canvas.pack(side="left", fill="both", expand=True)
+        scrollbar.pack(side="right", fill="y")
+
+        for i in range(len(inventario)):
+            btn = tk.Button(scrollable_frame, text= inventario[i].nome, bg="black", fg="white", font=("Arial", 12),
+                            command=partial(Itens,tipo,inventario[i],i),width=15)
+            btn.pack(padx=1, pady=1, anchor="w")
+    
+    frames_itens(frame_jo,jogador.getInventario(),"Jogador")
+    frames_itens(frame_com,array_Comerciante,"Comerciante")
+
 def iventario_Frame(root):
     if Config.frame_iventario is None:
 
         Config.frame_iventario = tk.Frame(root, bg="black", relief="ridge", 
                                           highlightbackground="white", highlightthickness=4, 
-                                          width=200, height=80)
+                                        height=80)
         Config.frame_iventario.place(relx=0.5, rely=0.8, anchor="center")
 
         frame_Intermedio = tk.Frame(Config.frame_iventario, bg="black")
@@ -873,13 +1001,13 @@ def Status(root):
         frame_HP = tk.Frame(frame,bg="black",relief="ridge", highlightbackground="white",highlightthickness=4)
         frame_HP.pack()
 
-        Config.labelHp = tk.Label(frame_HP, text=("HP: "+str(jogador.hp)),bg="black",fg="white",font=("Arial", 15))
+        Config.labelHp = tk.Label(frame_HP, text=("HP: "+str(jogador.hp)),bg="black",fg="white",font=("Arial", 18))
         Config.labelHp.grid(row=0, column=1, padx=6, pady=6)
 
-        Config.labelMp = tk.Label(frame_HP, text=("MP: "+str(jogador.mp)),bg="black",fg="white",font=("Arial", 15))
+        Config.labelMp = tk.Label(frame_HP, text=("MP: "+str(jogador.mp)),bg="black",fg="white",font=("Arial", 18))
         Config.labelMp.grid(row=0, column=3, padx=6, pady=6)
 
-        Config.labelFund = tk.Label(frame_HP, text=("Fund: "+str(jogador.fund)),bg="black",fg="white",font=("Arial", 12))
+        Config.labelFund = tk.Label(frame_HP, text=("Fund: "+str(jogador.fund)),bg="black",fg="white",font=("Arial", 14))
         Config.labelFund.grid(row=0, column=2, padx=6, pady=6)
 
         frame_dados = tk.Frame(frame,bg="black",relief="ridge", highlightbackground="white",highlightthickness=4)
@@ -893,7 +1021,7 @@ def Status(root):
 
         btn = tk.Button(frame_dados, text="Level up", bg="black", fg="white", font=("Arial", 12),
                                 command=partial(Tela_de_atributos),width=15)
-        btn.grid(row=0, column=3, padx=6, pady=6)
+        btn.grid(row=0, column=3)
         
         frame_Invent = tk.Frame(frame,bg="black")
         frame_Invent.pack()
@@ -1083,7 +1211,6 @@ def tela_morte():
     btn = tk.Button(Config.frame_morte, text=">", bg="black", fg="white", command=partial(Reinicio,False,Config.frame_morte), font=("Arial", 20))
     btn.grid(row=2, column=0, padx=12, pady=12)
     
-
 def get_Inimigo():
     inimigos_disponiveis = [
         (Goblin(), 1, 3, 3),   # Aparece do andar 1 ao 3 (peso 3)
@@ -1112,8 +1239,8 @@ def get_money():
     return dinheiro
 
 def get_Consumivel():
-    itens = [Pao(),Pano(),Poscao()]
-    peso = [4,2,2]
+    itens = [Pao(),Pano(),Poscao(),Raiz_mp()]
+    peso = [1,2,4,2]
     item = random.choices(itens,weights=peso,k=1)[0] 
     return item
 
@@ -1292,7 +1419,7 @@ def frame_classes():
 
 def Destrui_frame(frame):
     frame.destroy()
-
+    
     frame_imagens.place(relx=0.35, rely=0.45, anchor="center")
     
     root.bind("<Up>", on_key_press)

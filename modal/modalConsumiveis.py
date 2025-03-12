@@ -1,47 +1,49 @@
+class Consumivel:
+    def __init__(self, nome, descricao, vida, preco,mp):
+        self.nome = nome
+        self.descricao = descricao
+        self.vida = vida
+        self.mp = mp
+        self.tipo = "Comestível"
+        self.preco = preco
 
+    def efeito(self, jogador):
+        if self.vida > 0:
+            if jogador.hp + self.vida >= jogador.hpMax:
+                jogador.hp == jogador.hpMax
+            else: 
+                jogador.hp += self.vida
+        
+        if self.mp > 0:
+            if jogador.mp + self.mp >= jogador.mpMax:
+                jogador.mp == jogador.mpMax
+            else: 
+                jogador.mp += self.mp
+        
+        self.efeito_extra(jogador)
 
-class Pano:
+    def efeito_extra(self, jogador):
+        """Método para sobrescrever se necessário em subclasses."""
+        pass
+
+class Pano(Consumivel):
     def __init__(self):
-        self.nome = "Pano"
-        self.descricao = "Pano esfarapado(+5 vida)"
-        self.vida = 5
-        self.tipo = "Comestivel"
+        super().__init__("Pano", "Pano esfarapado (+5 hp)", 5, 5,0)
 
-    def efeito(self,jogador):
-        jogador.vida+=self.vida
-
-class Pao:
+class Pao(Consumivel):
     def __init__(self):
-        self.nome = "Pao"
-        self.descricao = "Pão mofado(+3 vida)"
-        self.vida = 3
-        self.tipo = "Comestivel"
+        super().__init__("Pão", "Pão mofado (+3 hp)", 3, 2,0)
 
-    def efeito(self,jogador):
-        jogador.vida+=self.vida
-
-class Pao:
+class Poscao(Consumivel):
     def __init__(self):
-        self.nome = "Pao"
-        self.descricao = "Pedaço de carne(+6 vida)"
-        self.vida = 6
-        self.tipo = "Comestivel"
+        super().__init__("Poção", "Poção estranha (+7 hp)", 7, 10,2)
 
-    def efeito(self,jogador):
-        jogador.vida+=self.vida
+    def efeito_extra(self, jogador):
+        jogador.estado = [efeito for efeito in jogador.estado if efeito.name != "Envenenamento"]
 
-class Poscao:
+class Raiz_mp(Consumivel):
     def __init__(self):
-        self.nome = "Poção"
-        self.descricao = "Poção estranha(+7 vida)"
-        self.vida = 7
-        self.tipo = "Comestivel"
+        super().__init__("Raiz de mandracora", "Raiz de propriedades Magicas\n(+4 mp)", 0, 8, 4)
 
-    def efeito(self,jogador):
-        jogador.vida+=self.vida
-
-        if any(efeito.name == "Envenenamento" for efeito in jogador.estado):
-            # Remove todos os efeitos chamados "Envenenamento"
-            jogador.estado = [efeito for efeito in jogador.estado if efeito.name != "Envenenamento"]
-
-
+    def efeito_extra(self, jogador):
+        jogador.estado = [efeito for efeito in jogador.estado if efeito.name != "Envenenamento"]

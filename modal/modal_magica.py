@@ -1,7 +1,7 @@
 import random
 
 class Magia:
-    def __init__(self, nome, custo_mana, dano, tipo,descricao,ativa=False, efeito=None, concequencia_efeito = None):
+    def __init__(self, nome, custo_mana, dano, tipo,descricao, preco, ativa=False, efeito=None, concequencia_efeito = None):
         self.nome = nome
         self.custo_mana = custo_mana
         self.dano = dano
@@ -11,6 +11,8 @@ class Magia:
         self.tipo = tipo
         self.ativa = ativa
         self.timer = 0
+
+        self.preco = preco
 
     def conjurar(self, conjurador, alvo):
         if conjurador.mp < self.custo_mana:
@@ -76,16 +78,16 @@ def Penalidade_Sacrificio_dano(jogador):
 
 class Sacrificio_Ithral(Magia):
     def __init__(self):
-        super().__init__("Sacrificio a Ithral", 1, 0, "Perpetua", "Sacrifique parte da vida maxima\nPor sabedoria\n(-3 hpmax, +3 wis)", efeito=Sacrificio_sabedoria)
+        super().__init__("Sacrificio a Ithral", 1, 0, "Perpetua", "Sacrifique parte da vida maxima\nPor sabedoria\n(-3 hpmax, +3 wis)",12, efeito=Sacrificio_sabedoria)
 
 class Sacrificio_Aroth(Magia):
     def __init__(self):
-        super().__init__("Sacrificio a Aroth", 3, 0, "Temporaria", "Por três turnos,\nseu dano dobra,\nPorém, após isso,\nele diminui pela metado", efeito=Sacrificio_dano,concequencia_efeito = Penalidade_Sacrificio_dano)
+        super().__init__("Sacrificio a Aroth", 3, 0, "Temporaria", "Por três turnos,\nseu dano dobra,\nPorém, após isso,\nele diminui pela metado", 12, efeito=Sacrificio_dano,concequencia_efeito = Penalidade_Sacrificio_dano)
 
 class Sacrificio_Selena(Magia):
     def __init__(self):
-        super().__init__("Sacrificio a Selena", 3, 0, "Perpetua", "Sacrifique parte da vida maxima\nPor mais Mp\n(-3 hp Max, +3 mp Max)", efeito=Sacrificio_MP)
+        super().__init__("Sacrificio a Selena", 3, 0, "Perpetua", "Sacrifique parte da vida maxima\nPor mais Mp\n(-3 hp Max, +3 mp Max)", 12, efeito=Sacrificio_MP)
 
 class Sacrificio_Elenna(Magia):
     def __init__(self):
-        super().__init__("Sacrificio a Elenna", 3, 0, "Perpetua", "Sacrifique parte do Mp maxima\nPor mais vida\n(+3 hp Max, -3 mp Max)", efeito=Sacrificio_Hp)
+        super().__init__("Sacrificio a Elenna", 3, 0, "Perpetua", "Sacrifique parte do Mp maxima\nPor mais vida\n(+3 hp Max, -3 mp Max)", 12, efeito=Sacrificio_Hp)

@@ -2,7 +2,7 @@ class Effect:
     def __init__(self, name, description,tipo , preco, apply_effect):
 
         self.nome = name
-        self.description = description
+        self.descricao = description
         self.tipo = tipo
         self.preco = preco
         self.apply_effect = apply_effect
@@ -11,7 +11,7 @@ class Effect:
         return self.apply_effect(target)
 
     def __str__(self):
-        return f"{self.getnome}: {self.description}\n"
+        return f"{self.getnome}: {self.descricao}\n"
     
     def getnome(self):
         return self.nome
@@ -45,13 +45,12 @@ def fire_effect(target):
     target.hp -= 4
     return f"\n- {target.nome} sofreu Queimaduras\n- {target.nome} sofreu 4 de dano"
 
-
 def Atordoamento_effect(target):
     target.precisao += 2
     return f"\n- Os ataques de {target.nome} ficaram\nimprecisos"
 
 def freeze_effect(target):
-    target.dex -= 1  # Reduz a destreza em 1 ponto
+    target.dex -= 1
     return f"\n- {target.nome} sofreu Congelamento\n- Destreza reduzida em 1 ponto."
 
 def sangria_effect(target,jogador):
@@ -59,7 +58,6 @@ def sangria_effect(target,jogador):
     jogador.hp += 2
     return f"\n- {target.nome} sofreu Sangria\n- {target.nome} perdeu 2 de vida.\n- {jogador.nome} recebeu 2 de vida"
 
-# Criando os efeitos com os métodos corretos
 Atordoamento = Effect(name="Atordoamento", description="Reduz a precisão do inimigo", tipo="Atributos", preco=5, apply_effect=Atordoamento_effect)
 Congelamento = Effect(name="Congelamento", description="Reduz a destreza do alvo em 1 ponto.", tipo="Atributos", preco=8, apply_effect=freeze_effect)
 Sangria = Effect(name="Sangria", description="Causa 2 de dano e dá 2 de vida ao usuario.", tipo="Vida e Dano", preco=6, apply_effect=sangria_effect)

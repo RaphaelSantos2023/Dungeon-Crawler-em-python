@@ -155,8 +155,11 @@ class Player:
         
         self.hp = 0
         self.hpMax = 0
+        self.hpSemArmadura = 0
+
         self.mp = 0
         self.mpMax = 0
+        self.mpSemArmadura = 0
 
         self.Condicoes = []
 
@@ -222,7 +225,7 @@ class Player:
         txt = ""
         for i in range(len(self.estado)):
             print(self.estado[i])
-            txt += f"{self.estado[i].nome} : {self.estado[i].description}"
+            txt += f"{self.estado[i].nome} : {self.estado[i].descricao}"
         
         return txt if self.estado else "Nenhum efeito ativo"
 
@@ -323,8 +326,11 @@ class Player:
                 self.cha += item.cha
             
             def DesetarArmadura():
-                self.hp -= self.armadura.Vitalidade
-                self.mp -= self.armadura.Sanidade
+                if self.hp == self.hpMax or self.hp > self.hpSemArmadura:
+                    self.hp -= self.armadura.Vitalidade
+                    
+                if self.mp == self.mpMax  or self.hp > self.mpSemArmadura:
+                    self.mp -= self.armadura.Sanidade
 
                 self.str -= self.armadura.str
                 self.dex -= self.armadura.dex
@@ -334,16 +340,16 @@ class Player:
                 self.cha -= self.armadura.cha
             
             if self.armadura == None:
+                self.hpSemArmadura = self.hpMax
+                self.mpSemArmadura = self.mpMax
+
                 setarArmadura()
             elif self.armadura != item:
                 DesetarArmadura()
                 setarArmadura()
         else:
             if self.hp != self.hpMax:
-                if self.hp + item.vida <= self.hpMax:
-                    self.hp += item.vida
-                else:
-                    self.hp = self.hpMax
+                item.efeito(self)
                 self.RemoveInventario(id)
     
     def RemoveInventario(self,id):

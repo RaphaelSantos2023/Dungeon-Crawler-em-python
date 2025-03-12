@@ -51,3 +51,12 @@ def Criatura_Escuro():
     evento = 5
 
     return img,label,btn1,btn2,evento
+
+def Comeciante():
+    img = "img/eventos/inicio/Comeciante_event.png"
+    label = "Uma voz assovia para você\n<Ei, colega, gostaria de algumas trocas?>"
+    btn1 = "Aceitar proposta"
+    btn2 = "Rejeitar proposta"
+    evento = 6
+
+    return img,label,btn1,btn2,evento
