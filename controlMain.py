@@ -12,8 +12,8 @@ from modal.modal_magica import Sacrificio_Ithral,Sacrificio_Aroth,Sacrificio_Sel
 from modal.modal import Player, Aranha, Goblin, Kobold, Zombi, Zombi_Controlado,Xonnominag,besta_Yithuyesh
 from modal.modal_classes import Carreira, Combate, Divindade
 
-from control.control_events_cenario import Bau,Encontro_Fantasma,combate_cenario,Tesouro_suspeito,fenda,Criatura_Escuro,Comeciante
-from control.control_events_conclusao import bau_respsota,Evneto_combate_respsota,tesouro_resposta,fenda_repsosta,fantasma_resposta,Dormindo_reposta,comerciante_resposta
+from control.control_events_cenario import Bau,Encontro_Fantasma,combate_cenario,Tesouro_suspeito,fenda,Criatura_Escuro,Comeciante,Aranha_evento
+from control.control_events_conclusao import bau_respsota,Evneto_combate_respsota,tesouro_resposta,fenda_repsosta,fantasma_resposta,Dormindo_reposta,comerciante_resposta,Aranha_resposta
 
 class Config:
     frame_jogador = None
@@ -236,16 +236,17 @@ class Mapa:
         for i in range(p_x, min(p_x + viewX, self.linhas)):
             for j in range(p_y, min(p_y + viewY, self.colunas)):
                 char = self.matriz[i][j]
-                if char == "E":
-                    img = self.redimensionar_imagem(imagens["entrada"])
-                elif char == "S":
-                    img = self.redimensionar_imagem(imagens["saida"])
-                elif char == "Q":
-                    img = self.redimensionar_imagem(imagens["q"])
-                elif char == "+":
-                    img = self.redimensionar_imagem(imagens["caminho"])
-                else:
-                    img = self.redimensionar_imagem(imagens["vazio"])
+                match char:
+                    case "E":
+                        img = self.redimensionar_imagem(imagens["entrada"])
+                    case "S":
+                        img = self.redimensionar_imagem(imagens["saida"])
+                    case "Q":
+                        img = self.redimensionar_imagem(imagens["q"])
+                    case "+":
+                        img = self.redimensionar_imagem(imagens["caminho"])
+                    case _:
+                        img = self.redimensionar_imagem(imagens["vazio"])
 
                 label = tk.Label(frame, image=img)
                 label.image = img
@@ -362,15 +363,16 @@ class Mapa:
         self.btn1 = tk.Button(frame_btn,text=btn1T,bg="black",fg="white",borderwidth=3, relief="sunken",padx=50, pady=25,command=partial(self.Metodo_resposta,tipo,frame,label,1),width=10)
         self.btn1.grid(row=0, column=0, padx=5, pady=5)
         
-        self.btn2 = tk.Button(frame_btn,text=btn2T,bg="black",fg="white",borderwidth=3, relief="sunken",padx=50, pady=25,command=partial(self.Metodo_resposta,tipo,frame,label,2),width=10)
-        self.btn2.grid(row=0, column=2, padx=5, pady=5)
+        if btn2T != "":
+            self.btn2 = tk.Button(frame_btn,text=btn2T,bg="black",fg="white",borderwidth=3, relief="sunken",padx=50, pady=25,command=partial(self.Metodo_resposta,tipo,frame,label,2),width=10)
+            self.btn2.grid(row=0, column=2, padx=5, pady=5)
 
         return frame
     
     def selecionar_evento(self):
-        peso = [1,1,3,2,1,2,2]
+        peso = [1,1,3,2,1,2,2,2]
 
-        eventos = [Bau,Encontro_Fantasma, combate_cenario,Tesouro_suspeito,fenda,Criatura_Escuro,Comeciante]
+        eventos = [Bau,Encontro_Fantasma, combate_cenario,Tesouro_suspeito,fenda,Criatura_Escuro,Comeciante,Aranha_evento]
 
         eventos_escolhido = random.choices(eventos, weights=peso, k=1)[0]
 
@@ -403,28 +405,27 @@ class Mapa:
 
             btn1T = ">"
             self.btn1.config(text=btn1T,command=partial(self.destruir_Tela_evento,frame))
-            self.btn2.grid_forget() 
-
-            if tipo == 0:
-                bau_respsota(btn,self.btn1,self.btn2,label,txt,teste,jogador,btn1T,get_money,get_Consumivel,frame,self.destruir_Tela_evento)
-
-            elif tipo == 1:
-                self.EmCombate = fantasma_resposta(btn,jogador,teste,txt,label)
-            elif tipo == 2:
-                self.EmCombate = Evneto_combate_respsota(btn, self.btn1, txt, teste, jogador, btn1T, Criar_Tela_Combat, get_Inimigo, frame, label)
             
-            elif tipo == 3:
-                tesouro_resposta(btn, self.btn1, txt, teste, jogador, btn1T, Criar_Tela_Combat, get_money, frame, label)
+            if self.btn2 and self.btn2.winfo_exists():
+                self.btn2.grid_forget()
             
-            elif tipo == 4:
-                fenda_repsosta(btn,self.btn1,self.btn2,txt,teste,jogador,btn1T,label,get_money,get_Consumivel,frame,self.destruir_Tela_evento)
-            
-            elif tipo ==5:
-                Dormindo_reposta(btn,self.btn1,txt,teste,jogador,btn1T,label,get_Inimigo,Criar_Tela_Combat,frame,self.destruir_Tela_evento,get_money,get_Consumivel)
-                
-            elif tipo == 6:
-                comerciante_resposta(btn,self.btn1,txt,label,Tela_comeciante,frame)
-            
+            match tipo:
+                case 0:
+                    bau_respsota(btn, self.btn1, self.btn2, label, txt, teste, jogador, btn1T, get_money, get_Consumivel, frame, self.destruir_Tela_evento)
+                case 1:
+                    self.EmCombate = fantasma_resposta(btn, jogador, teste, txt, label)
+                case 2:
+                    self.EmCombate = Evneto_combate_respsota(btn, self.btn1, txt, teste, jogador, btn1T, Criar_Tela_Combat, get_Inimigo, frame, label)
+                case 3:
+                    tesouro_resposta(btn, self.btn1, txt, teste, jogador, btn1T, Criar_Tela_Combat, get_money, frame, label)
+                case 4:
+                    fenda_repsosta(btn, self.btn1, self.btn2, txt, teste, jogador, btn1T, label, get_money, get_Consumivel, frame, self.destruir_Tela_evento)
+                case 5:
+                    Dormindo_reposta(btn, self.btn1, txt, teste, jogador, btn1T, label, get_Inimigo, Criar_Tela_Combat, frame, self.destruir_Tela_evento, get_money, get_Consumivel)
+                case 6:
+                    comerciante_resposta(btn, self.btn1, txt, label, Tela_comeciante, frame)
+                case 7:
+                    Aranha_resposta(txt,label,jogador)
     
     def destruir_Tela_evento(self, frame):
         frame.destroy()
@@ -447,14 +448,15 @@ def on_key_press(event):
 
     if mapa_copiado.EmEvento is False:
         key = event.keysym
-        if key == "Up":
-            movimentar("Cima")
-        elif key == "Down":
-            movimentar("Baixo")
-        elif key == "Left":
-            movimentar("Esquerda")
-        elif key == "Right":
-            movimentar("Direita")
+        match key:
+            case "Up":
+                movimentar("Cima")
+            case "Down":
+                movimentar("Baixo")
+            case "Left":
+                movimentar("Esquerda")
+            case "Right":
+                movimentar("Direita")
         mapa_copiado.descer_Saida = True
 
         atualizar_Mapa()

@@ -1,6 +1,7 @@
 from functools import partial
 from modal.modal import Vazo_inimigo, mimico
 import random
+from modal.modal_arma import Envenenamento,Atordoamento
 
 def bau_respsota(btn,btn1,btn2,label,txt,teste,jogador,btn1T,get_money,get_Consumivel,frame,destruir_Tela_evento):             
     if btn == 1:
@@ -148,4 +149,16 @@ def comerciante_resposta(btn,btn1,txt,label,Tela_comeciante,frame):
         btn1.config(command=partial(Tela_comeciante,frame))
     elif btn == 2:
         txt = "<Uma pena, realmente>"
+    label.config(text=txt)
+
+def Aranha_resposta(txt,label,jogador):
+    estado = None
+    if Envenenamento not in jogador.estado:
+        estado = Envenenamento
+    else:
+        estado = Atordoamento
+
+    txt = "Você a aremessa ao longe\nnum mover de mão, mas\njá é tarde. Sua mão incha e\na visão entrota, vertiginosa e\ntremula."
+    jogador.estado.append(estado)
+
     label.config(text=txt)

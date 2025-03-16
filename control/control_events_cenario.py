@@ -60,3 +60,12 @@ def Comeciante():
     evento = 6
 
     return img,label,btn1,btn2,evento
+
+def Aranha_evento():
+    img = "img/eventos/inicio/Aranha_evento.png"
+    label = "No que você perambulava pela\nmasmorra, você sente uma\ndor ardente na mão.\nVocê se vira e vê\numa aranha sobre sua mão"
+    btn1 = ">"
+    btn2 = ""
+    evento = 7
+
+    return img,label,btn1,btn2,evento
