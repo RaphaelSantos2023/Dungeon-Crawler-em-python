@@ -8,7 +8,7 @@ import copy
 from modal.modalConsumiveis import Pao,Pano,Poscao,Raiz_mp
 from modal.modal_arma import Weapon, Faca, Espada, Machado, Lanca, Cajado, Envenenamento,Queimadura,Sangramento,Sangria,Congelamento,Atordoamento
 from modal.modal_equipamento import Coroa_de_Elenna, Capa_verdade, Armadura_Aroth, Amuleto_Lunar, Capuz_cultista, Armadura_malha, Armadura_couro, Armadura_ferro
-from modal.modal_magica import Sacrificio_Ithral,Sacrificio_Aroth,Sacrificio_Selena,Sacrificio_Elenna
+from modal.modal_magica import Sacrificio_Ithral,Sacrificio_Aroth,Sacrificio_Selena,Sacrificio_Elenna, Bola_de_fogo, Sangria_magia, Intervencao_divina
 from modal.modal import Player, Aranha, Goblin, Kobold, Zombi, Zombi_Controlado,Xonnominag,besta_Yithuyesh
 from modal.modal_classes import Carreira, Combate, Divindade
 
@@ -301,9 +301,7 @@ class Mapa:
     def verificar_caminho(self,linha,coluna):
         for coord in self.Coord_caminho:
             if coord["linha"] == linha and coord["coluna"] == coluna:
-                print("\n\nTruee\n\n")
                 return True
-        print("\n\nFALSO\n\n")
         self.Coord_caminho.append({"linha": linha, "coluna": coluna})
         return False
 
@@ -543,7 +541,7 @@ def Criar_Tela_Combat(inimigo, root):
     LabelDescri.insert("end", "A batalha começou!")
     LabelDescri.config(state="disabled")
 
-    Frame_inimigo = tk.Frame(frame_inimigo,bg="black", relief="ridge", highlightbackground="white", highlightthickness=4)
+    Frame_inimigo = tk.Frame(frame_inimigo,bg="black")
     Frame_inimigo.grid(row=1, column=1, padx=2, pady=2)
 
     img = redimensionarImagem(inimigo.simbolo["simbolo"],444, 391)
@@ -585,19 +583,35 @@ def Criar_Tela_Combat(inimigo, root):
     LabelMag.grid(row=3, column=0, padx=3, pady=3)
     
     for i in range(len(jogador.Bencaos)):
-        if (jogador.Bencaos[i].tipo =="Temporaria" ):
+        if (jogador.Bencaos[i].tipo != "Perpetua" ):
             btnConv = tk.Button(frame_btn, text=jogador.Bencaos[i].nome, bg="black", fg="white", font=("Arial", 12), 
-                            command=partial(Conjurar_magia_Temporaria, jogador,jogador.Bencaos[i], LabelDescri),width=15)
+                            command=partial(Conjurar_magia_Temporaria, jogador,jogador.Bencaos[i], LabelDescri,inimigo,Turno),width=15)
             btnConv.grid(row=3+i, column=1, padx=3, pady=3)
 
-def Conjurar_magia_Temporaria(personagem, magia,LabelDescri):
+def Conjurar_magia_Temporaria(personagem, magia,LabelDescri,inimigo,Turno):
     LabelDescri.config(state="normal")
 
     txt= "\n"
-    txt += personagem.conjurarMagia(magia)
+    txt += personagem.conjurarMagia(magia,inimigo)
     
     LabelDescri.insert("end", txt + "\n")
+
+    if inimigo.hp > 0:
+        txt = Acao(inimigo, personagem, "Ataque")
+        LabelDescri.insert("end", txt + "\n")
+        Config.labelHPInimigo.config(text="HP: "+ str(inimigo.hp))
+
+    LabelDescri.see("end")
+    LabelDescri.config(state="disabled")
+
+    State = definir_vitoria(personagem, inimigo)
+
     Atualizar_Dados()
+
+    if State is not None:
+        Turno = False
+        Tela_vitoria(State, personagem, inimigo)
+
     
 def Descisao(personagem, adversario, tipo, LabelDescri, Turno):
     LabelDescri.config(state="normal")
@@ -699,6 +713,7 @@ def Tela_vitoria(caso, personagem, adversario):
             txt = f"Você venceu!\nVocê conseguiu {adversario.exp} exp\n{fund} funds\n {item.nome}"
             
             if jogador.magiaAtiva:
+                print(jogador.magiaAtiva)
                 for metodo in jogador.magiaAtiva:
                     metodo.concequencia_efeito(jogador)
                     txt += f'\nHaverá consequencias para seus atos'
@@ -980,6 +995,7 @@ def Status(root):
 
         i = 0
         for magias in jogador.Bencaos:
+
             btn = tk.Button(frame_magias, text=magias.nome, bg="black", fg="white", font=("Arial", 12),
                                     command=partial(mudar_texto,frame_descricao,label,magias),width=15)
             btn.pack()
@@ -1284,6 +1300,9 @@ def colocar_atributos(classes_selecionadas, frame):
 
     if jogador.carreira == "Herbalista":
         jogador.weapon.efeito.append(Envenenamento)
+    if jogador.combate == "Sacerdote":
+        jogador.Bencaos.append(Bola_de_fogo())
+        jogador.Bencaos.append(Intervencao_divina())
 
     jogador.hp = jogador.hpMax
     jogador.mp = jogador.mpMax
@@ -1310,7 +1329,7 @@ def aspecto_combate():
         Combate("Cavaleiro", "Guerreiro resistente e poderoso.", Espada(), 3, 3, 0, 0, 0, 1, 1, 5, 2),
         Combate("Bárbaro", "Guerreiro feroz e resistente.", Machado(), 4, 2, 0, 2, 0, -1, 3, 6, 1),
         Combate("Lanceiro", "Controla o campo de batalha.", Lanca(), 1, 5, 3, 0, 2, 2, 1, 3, 2),
-        Combate("Sacerdote", "Ocultista das artes divinas.", Cajado(), -1, 2, 2, 1, 3, -1, 0, 3, 6)
+        Combate("Sacerdote", "Ocultista das artes divinas.", Cajado(), -1, 2, 2, 1, 3, -1, 0, 4, 6)
     ]
     return aspectos_combate
 
@@ -1377,7 +1396,7 @@ def frame_classes():
                                    command=partial(colocar_atributos, classes_selecionadas, frame), width=60)
             btnProximo.pack()
     
-    frame = tk.Frame(root, bg="black", relief="ridge", highlightbackground="white", highlightthickness=2)
+    frame = tk.Frame(root, bg="black")
     frame.place(relx=0.5, rely=0.5, anchor="center")
     
     frame_categorias = tk.Frame(frame, bg="black")

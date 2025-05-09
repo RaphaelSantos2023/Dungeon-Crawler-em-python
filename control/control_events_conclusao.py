@@ -73,16 +73,16 @@ def tesouro_resposta(btn, btn1, txt, teste, jogador, btn1T, Criar_Tela_Combat, g
 
 def fantasma_resposta(btn,jogador,teste,txt,label):
     if btn == 1 and jogador.wis >= teste:
-        txt = "(Tesde de Sabedoria: Sucesso)\nNão é uma voz, mas varias\n, em coral. A melidia lhe traz paz,\nMesmo num lugar tão sombrio\nQuanto a masmorra\n(+2 mp)"
+        txt = "(Tesde de Sabedoria: Sucesso)\nNão é uma voz, mas varias\n, em coral. A melidia lhe traz paz\n(+2 mp)"
     elif btn == 2 and jogador.dex >= teste:
-        txt = "(Teste de Dextreza: Sucesso)\nVocê consegue fugir da sala\nsem maiores problemas.\nQualquer que fosse a fonte da vozes\nprovavelmente não é coisa boa.\nNada nessa masmorra é boa"
+        txt = "(Teste de Dextreza: Sucesso)\nVocê consegue fugir da sala\nsem maiores problemas."
     else:
         txt = ""
         if btn== 2:
-            txt="(Teste de Dextreza: Falha)\nNão importa o quanto você corra, a voz se agrava em uma crescente."
+            txt="(Teste de Dextreza: Falha)\nNão importa o quanto você corra,\na voz se agrava em uma crescente."
         else:
             txt="(Teste de Sabedoria: Falha)"
-        txt+="\nVocê percebe que não\nsão vozes, mas gritos.Um pandemonio\nde almas condenadas berrão em dor.\nO horror e exaustão te levam aos joelhos.\nVocê desmaia.\nAo acordar, as vozes sairam, mas o eco\nde seu sofrimento vai\npermanecer pra sempre com você\n(- 3 mp)"
+        txt+="\nVocê percebe que não\nsão vozes, mas gritos\nUm pandemonio de almas condenadas\nO horror te leva a desmaiar.\nAo acordar, as vozes desapareceram\n(- 3 mp)"
     label.config(text=txt)
 
 def fenda_repsosta(btn,btn1,btn2,txt,teste,jogador,btn1T,label,get_money,get_Consumivel,frame,destruir_Tela_evento):

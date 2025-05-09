@@ -8,17 +8,16 @@ class Consumivel:
         self.preco = preco
 
     def efeito(self, jogador):
-        if self.vida > 0:
-            if jogador.hp + self.vida >= jogador.hpMax:
-                jogador.hp == jogador.hpMax
-            else: 
-                jogador.hp += self.vida
         
-        if self.mp > 0:
-            if jogador.mp + self.mp >= jogador.mpMax:
-                jogador.mp == jogador.mpMax
-            else: 
-                jogador.mp += self.mp
+        if jogador.hp + self.vida >= jogador.hpMax:
+            jogador.hp = jogador.hpMax
+        else: 
+            jogador.hp += self.vida
+        
+        if jogador.mp + self.mp >= jogador.mpMax:
+            jogador.mp = jogador.mpMax
+        else: 
+            jogador.mp += self.mp
         
         self.efeito_extra(jogador)
 
@@ -46,4 +45,4 @@ class Raiz_mp(Consumivel):
         super().__init__("Raiz de mandracora", "Raiz de propriedades Magicas\n(+4 mp)", 0, 8, 4)
 
     def efeito_extra(self, jogador):
-        jogador.estado = [efeito for efeito in jogador.estado if efeito.name != "Envenenamento"]
+        jogador.estado = [efeito for efeito in jogador.estado if efeito.nome != "Envenenamento"]

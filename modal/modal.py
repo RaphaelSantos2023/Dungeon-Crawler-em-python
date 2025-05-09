@@ -74,12 +74,11 @@ class Inimigo:
                 self.turnos_c_efeito = 0
             else:
                 self.turnos_c_efeito +=1
-                
-                for efeito in self.estado[i]:
-                    if efeito == Sangria:
-                       txt += efeito.apply_effect(self,inimigo)
-                    else:
-                        txt += efeito.apply_effect(self)
+
+                if self.estado[i] == Sangria:
+                    txt += self.estado[i].apply_effect(self,inimigo)
+                else:
+                    txt += self.estado[i].apply_effect(self)
         return txt
 
     def perderVida(self, dano):
@@ -151,7 +150,7 @@ class Vazo_inimigo(Inimigo):
 class Player:
     def __init__(self):
         self.level = 1
-        self.exp = 220
+        self.exp = 0
         
         self.hp = 0
         self.hpMax = 0
@@ -251,12 +250,10 @@ class Player:
         return False
     
     def conjurarMagia(self, magia, alvo=None):
-        self.magiaAtiva.append(magia)
-        if magia.tipo != "Temporaria":
-            magia.efeito(self)
-        else:
-            txt = magia.efeito(self)
-            return txt
+
+        txt = magia.conjurar(self,alvo)
+        
+        return txt
 
 
     def attack(self, target):

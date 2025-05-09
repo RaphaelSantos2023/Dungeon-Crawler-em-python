@@ -35,7 +35,7 @@ class Capuz_cultista(Equipamento):
 
 class Amuleto_Lunar(Equipamento):
     def __init__(self):
-        super().__init__("Amuleto Lunar","Amuleto dos sacerdotes lunares","Armadura",0,4,None,0,0,0,0,3,0,23)
+        super().__init__("Amuleto Lunar","Amuleto dos sacerdotes lunares","Armadura",3,4,None,0,0,0,0,3,0,23)
 
 class Armadura_Aroth(Equipamento):
     def __init__(self):

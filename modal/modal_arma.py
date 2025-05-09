@@ -36,9 +36,7 @@ def bleed_effect(target):
     return f"\n- {target.nome} sofreu sangramento\n- {target.nome} sofreu 7 de dano"
 
 def poison_effect(target):
-    print("Hp antes do envenenamento: "+ str(target.hp))
     target.hp -= 2
-    print("Hp depois do envenenamento: "+ str(target.hp))
     return f"\n- {target.nome} sofreu envenamento\n- {target.nome} sofreu 2 de dano"
 
 def fire_effect(target):

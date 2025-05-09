@@ -1,4 +1,5 @@
 import random
+from modal.modal_arma import Queimadura, Sangria
 
 class Magia:
     def __init__(self, nome, custo_mana, dano, tipo,descricao, preco, ativa=False, efeito=None, concequencia_efeito = None):
@@ -14,11 +15,11 @@ class Magia:
 
         self.preco = preco
 
-    def conjurar(self, conjurador, alvo):
+    def conjurar(self, conjurador, alvo=None):
         if conjurador.mp < self.custo_mana:
             return f"\n- {conjurador.nome} tentou lançar {self.nome}, mas não tinha mana suficiente!"
         
-        conjurador.mana -= self.custo_mana
+        conjurador.mp -= self.custo_mana
 
         if self.tipo == "Ataque":
             dano_real = self.dano + random.randint(-5, 5)
@@ -26,8 +27,9 @@ class Magia:
             alvo.perderVida(dano_real)
             text = f"\n- {conjurador.nome} lança {self.nome} em {alvo.nome}, causando {dano_real} de dano!"
 
-            if self.efeito:
-                text += f"\n- {alvo.nome} foi afetado por {self.efeito}!"
+            if alvo != None:
+                text += self.efeito(alvo)
+
         
         elif self.tipo == "Temporaria":
             conjurador.magiaAtiva.append(self.efeito)
@@ -75,6 +77,29 @@ def Sacrificio_dano(jogador):
 def Penalidade_Sacrificio_dano(jogador):
     jogador.penalidade = jogador.Dano//2
 
+def Bola_fogo(jogador):
+    jogador.estado.append(Queimadura)
+    return f"\n- {jogador.nome} está em chamas!"
+
+def Sangria_efeito(jogador):
+    jogador.estado.append(Sangria)
+
+def Protecao_divina(jogador):
+    vida = 2
+    jogador.hp += vida
+    return "- "+ str(jogador.divindade)+ " ouve suas preçes e te cura\n- Mais "+ str(vida)+ " de vida"
+
+class Bola_de_fogo(Magia):
+    def __init__(self):
+        super().__init__("Bola de fogo", 2, 3, "Ataque", "Lança bolas de fogo\nAlguns dizem ouvirem\nRisos vinta das chamas",15, efeito=Bola_fogo)
+
+class Sangria_magia(Magia):
+    def __init__(self):
+        super().__init__("Sangria", 3, 0, "Ataque", "Ao usar, drena\nParte da vida do\nInimigo",17, efeito=Sangria_efeito)
+
+class Intervencao_divina(Magia):
+    def __init__(self):
+        super().__init__("Interverção divina", 2, 0, "Perpetua", "Reze pela intervenção de seu deus",20, efeito=Protecao_divina)
 
 class Sacrificio_Ithral(Magia):
     def __init__(self):
